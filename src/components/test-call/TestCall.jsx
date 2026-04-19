@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import confetti from "canvas-confetti"
+import { useDialKit } from "dialkit"
 import {
   CheckIcon,
   PhoneArrowUpRightIcon,
@@ -552,8 +553,58 @@ const CONFETTI_COLORS = [
   "#9332e0",
 ]
 
+const POSITION_X = {
+  "bottom-left": 0.15,
+  "bottom-center": 0.5,
+  "bottom-right": 0.85,
+}
+
 const Confetti = () => {
   const canvasRef = useRef(null)
+  const fireRef = useRef(null)
+  const paramsRef = useRef(null)
+
+  const p = useDialKit(
+    "Confetti",
+    {
+      position: {
+        type: "select",
+        options: [
+          { value: "bottom-left", label: "Bottom Left" },
+          { value: "bottom-center", label: "Bottom Center" },
+          { value: "bottom-right", label: "Bottom Right" },
+        ],
+        default: "bottom-center",
+      },
+      volume: [380, 50, 800],
+      speed: [25, 20, 120],
+      fire: { type: "action", label: "Fire" },
+    },
+    {
+      onAction: (action) => {
+        if (action === "fire") firePreset()
+      },
+    },
+  )
+  paramsRef.current = p
+
+  const firePreset = () => {
+    const fire = fireRef.current
+    const current = paramsRef.current
+    if (!fire || !current) return
+    fire({
+      origin: { x: POSITION_X[current.position] ?? 0.5, y: 1 },
+      angle: 90,
+      spread: 110,
+      startVelocity: current.speed,
+      gravity: 0.55,
+      decay: 0.94,
+      ticks: 400,
+      particleCount: current.volume,
+      scalar: 0.95,
+      colors: CONFETTI_COLORS,
+    })
+  }
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -563,26 +614,16 @@ const Confetti = () => {
       resize: true,
       useWorker: false,
     })
+    fireRef.current = fire
 
-    const timeout = setTimeout(() => {
-      fire({
-        origin: { x: 0.5, y: 1 },
-        angle: 90,
-        spread: 110,
-        startVelocity: 55,
-        gravity: 0.55,
-        decay: 0.94,
-        ticks: 400,
-        particleCount: 420,
-        scalar: 0.95,
-        colors: CONFETTI_COLORS,
-      })
-    }, 450)
+    const timeout = setTimeout(firePreset, 450)
 
     return () => {
       clearTimeout(timeout)
       fire.reset()
+      fireRef.current = null
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
