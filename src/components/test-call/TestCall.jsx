@@ -23,7 +23,7 @@ const TestCall = () => {
 
   return (
     <div className="bg-gray-200 p-2.5 min-h-screen">
-      <div className="bg-gradient-to-b from-white to-gray-25 rounded-[10px] p-7 min-h-[calc(100vh-20px)]">
+      <div className="bg-gradient-to-b from-white to-gray-25 rounded-[10px] p-4 sm:p-7 min-h-[calc(100vh-20px)]">
         <div className="max-w-[720px] mx-auto">
           {/* Logo */}
           <div className="flex justify-center items-center">
@@ -34,7 +34,7 @@ const TestCall = () => {
           <Stepper />
 
           {/* Title */}
-          <div className="max-w-[500px] mx-auto mt-12 mb-8 text-center">
+          <div className="max-w-[500px] mx-auto mt-8 sm:mt-12 mb-6 sm:mb-8 text-center">
             <h1 className="text-2xl font-bold text-black tracking-[-0.02em] leading-8">
               Your agent is ready.
               <br />
@@ -200,7 +200,7 @@ const CallCard = ({ isCompleted }) => {
               </p>
             </div>
 
-            <div className="flex gap-6 w-full">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full">
               <RosieNumber />
               <TryAsking />
             </div>
@@ -212,7 +212,7 @@ const CallCard = ({ isCompleted }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, delay: 0.05 }}
-            className="flex gap-6 items-center w-full"
+            className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center w-full"
           >
             <div className="flex-1 flex flex-col gap-1.5 items-start">
               <h2 className="text-xl font-bold text-black tracking-[-0.02em] leading-[30px]">
@@ -235,7 +235,7 @@ const CallCard = ({ isCompleted }) => {
               </button>
             </div>
 
-            <div className="bg-purple-25 border border-[#f6eaff] rounded-xl p-4 flex items-center justify-center shrink-0">
+            <div className="bg-purple-25 border border-[#f6eaff] rounded-xl p-4 flex items-center justify-center w-full sm:w-auto sm:shrink-0">
               <CallPill />
             </div>
           </motion.div>
@@ -268,7 +268,7 @@ const RosieNumber = () => {
 
 const CallPill = () => {
   return (
-    <div className="bg-white border border-[rgba(42,20,60,0.1)] rounded-full flex items-center justify-between pl-2 pr-5 py-2 gap-2 w-[272px]">
+    <div className="bg-white border border-[rgba(42,20,60,0.1)] rounded-full flex items-center justify-between pl-2 pr-5 py-2 gap-2 w-full max-w-[272px]">
       <div className="bg-purple-200 border border-purple-200 rounded-full h-[34px] px-3 flex items-center gap-1.5">
         <PhoneArrowUpRightIcon className="size-4 text-purple-700" />
         <span className="text-purple-700 text-sm font-medium">Call</span>
@@ -339,7 +339,7 @@ const FeedbackCard = ({
       </motion.div>
 
       {isUnlocked && (
-        <div className="flex gap-7 items-center w-full">
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-7 items-stretch sm:items-center w-full">
           <FeedbackOption
             index={0}
             variant="primary"
