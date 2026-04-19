@@ -12,6 +12,12 @@ const prototypes = [
     name: "Sidebar banners",
     description: "Banner components and patterns for the app sidebar.",
   },
+  {
+    slug: "test-call",
+    name: "Test call",
+    description:
+      "Guided setup test call step with locked feedback card that unlocks after completing a call.",
+  },
 ]
 
 export default function PrototypesIndex() {

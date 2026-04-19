@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "canvas-confetti": "^1.9.4",
     "motion": "^12.18.1",
     "next": "15.3.8",
     "react": "^19.0.0",
