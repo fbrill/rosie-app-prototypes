@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# playwright MCP scratch output (screenshots, snapshots, console logs)
+.playwright-mcp/
+test-call-*.png
