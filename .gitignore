@@ -42,4 +42,5 @@ next-env.d.ts
 
 # playwright MCP scratch output (screenshots, snapshots, console logs)
 .playwright-mcp/
+.screenshots/
 test-call-*.png
