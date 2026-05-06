@@ -40,3 +40,19 @@ html, body {
 .ani {
   transition: all 250ms ease-in-out;
 }
+
+/* Soft glow radiating outward from the call pill — matches the listening state. */
+@keyframes phone-glow {
+  0%   { box-shadow: 0 0 0 0 rgba(147, 50, 224, 0.5); }
+  100% { box-shadow: 0 0 0 22px rgba(147, 50, 224, 0); }
+}
+
+.phone-glow {
+  animation: phone-glow 1.6s ease-out infinite;
+}
+
+/* DialKit ships with a preset/version manager in the panel toolbar — we don't
+   use versions in this prototype, so hide the row entirely. */
+.dialkit-preset-manager {
+  display: none !important;
+}
