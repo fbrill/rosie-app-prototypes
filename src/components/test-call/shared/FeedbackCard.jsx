@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
-import {
-  ArrowRightIcon,
-  CheckIcon,
-  PlayIcon,
-} from "@heroicons/react/24/solid"
+import { ArrowRightIcon, CheckIcon, PlayIcon } from "@heroicons/react/24/solid"
 import {
   SpeakerWaveIcon,
   MegaphoneIcon,
@@ -300,7 +296,10 @@ const WorkPath = ({ onGoLive, askedTransfer, askedAppointment }) => {
 
       <TestAgainBanner onGoLive={onGoLive} />
 
-      <Modal open={openModal === "pronounce"} onClose={() => setOpenModal(null)}>
+      <Modal
+        open={openModal === "pronounce"}
+        onClose={() => setOpenModal(null)}
+      >
         <PronunciationModal
           initialValue={editedTiles.pronounce}
           onClose={() => setOpenModal(null)}
@@ -341,8 +340,8 @@ const WorkPath = ({ onGoLive, askedTransfer, askedAppointment }) => {
 const TestAgainBanner = ({ onGoLive }) => (
   <div className="rounded-2xl bg-gradient-to-br from-purple-100 via-purple-50 to-purple-100 border border-purple-200 p-4 sm:p-5 flex flex-col items-center gap-3">
     <p className="text-[13.5px] font-medium text-gray-700 tracking-[-0.01em] leading-[1.5] text-center max-w-[440px]">
-      Make changes above to tune how your agent understands your business —
-      then test the call again or just go live.
+      Make changes above to tune how your agent understands your business — then
+      test the call again and go live.
     </p>
     <CallPill size="default" />
     <button
@@ -350,7 +349,7 @@ const TestAgainBanner = ({ onGoLive }) => (
       onClick={onGoLive}
       className="text-[13px] font-medium text-gray-700 tracking-[-0.01em] cursor-pointer hover:text-black underline"
     >
-      Or just go live →
+      Ready? Go live →
     </button>
   </div>
 )
@@ -651,8 +650,7 @@ const DefaultGreetingCard = () => (
     </p>
     <p className="text-[14px] text-black tracking-[-0.01em] leading-[1.55]">
       Hello, thank you for calling {BUSINESS_NAME}. Our call may be recorded
-      today for quality control purposes. My name is Rosie, how can I help
-      you.
+      today for quality control purposes. My name is Rosie, how can I help you.
     </p>
   </div>
 )
@@ -667,9 +665,8 @@ const CustomGreetingPlaceholder = () => (
         Standard greeting customization options
       </p>
       <p className="text-[13px] font-medium text-gray-700 tracking-[-0.01em] leading-[1.5]">
-        Write your own greeting with company info, dynamic tags, and an
-        optional legal disclaimer. Editor coming soon — stick with the
-        default for now.
+        Write your own greeting with company info, dynamic tags, and an optional
+        legal disclaimer. Editor coming soon — stick with the default for now.
       </p>
     </div>
   </div>
@@ -691,8 +688,8 @@ const StubModal = ({ tile, edited, onClose, onSave }) => {
           </div>
           <p className="text-[13px] font-medium text-gray-700 tracking-[-0.01em] leading-[1.5]">
             This step is a placeholder for the real editor. Click{" "}
-            <span className="font-semibold text-black">Save</span> to mark it
-            as updated for the prototype walkthrough.
+            <span className="font-semibold text-black">Save</span> to mark it as
+            updated for the prototype walkthrough.
           </p>
         </div>
       </div>
