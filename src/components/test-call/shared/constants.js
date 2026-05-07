@@ -19,4 +19,7 @@ export const ROSIE_NUMBER = "(913) 423-8370"
 // The (fake) number the user dialed Rosie from in this prototype session.
 export const USER_TEST_NUMBER = "(415) 555-0123"
 
+// Placeholder business name — swap for a real value when wired to an account.
+export const BUSINESS_NAME = "Victoria Bakos"
+
 export const PROCESSING_DELAY_MS = 1400
