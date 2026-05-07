@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
-import { ArrowRightIcon, CheckIcon, PlayIcon } from "@heroicons/react/24/solid"
+import {
+  ArrowRightIcon,
+  CheckIcon,
+  HandThumbUpIcon,
+  PlayIcon,
+} from "@heroicons/react/24/solid"
 import {
   SpeakerWaveIcon,
   MegaphoneIcon,
@@ -12,6 +17,7 @@ import {
   IdentificationIcon,
   InformationCircleIcon,
   PencilSquareIcon,
+  WrenchScrewdriverIcon,
   XMarkIcon,
   DocumentTextIcon,
 } from "@heroicons/react/24/outline"
@@ -23,6 +29,7 @@ import { Confetti } from "./Confetti"
 const CTA_LABEL = "Choose a live plan"
 
 export const FeedbackCard = ({
+  variant = "a",
   feedback,
   setFeedback,
   onGoLive,
@@ -31,6 +38,23 @@ export const FeedbackCard = ({
   askedAppointment,
   showCallDetails = false,
 }) => {
+  if (variant === "c") {
+    return (
+      <ReadyByDefault
+        onGoLive={onGoLive}
+        onTestAgain={onTestAgain}
+        askedTransfer={askedTransfer}
+        askedAppointment={askedAppointment}
+        showCallDetails={showCallDetails}
+      />
+    )
+  }
+
+  // Variant A always shows the toggle. Variant B shows the split picker only
+  // until the user picks a side, then commits to that path with no toggle.
+  const showSelector =
+    variant === "a" || (variant === "b" && feedback === null)
+
   return (
     <motion.div
       layout
@@ -40,9 +64,15 @@ export const FeedbackCard = ({
       className={`relative bg-white rounded-[20px] ${CARD_SHADOW} flex flex-col overflow-hidden`}
     >
       <div className="flex flex-col gap-5 p-5 sm:p-6">
-        <motion.div layout="position" className="flex justify-center">
-          <FeedbackToggle feedback={feedback} setFeedback={setFeedback} />
-        </motion.div>
+        {showSelector && (
+          <motion.div layout="position" className="flex justify-center">
+            {variant === "b" ? (
+              <SplitFeedbackPicker onPick={setFeedback} />
+            ) : (
+              <FeedbackToggle feedback={feedback} setFeedback={setFeedback} />
+            )}
+          </motion.div>
+        )}
 
         <AnimatePresence mode="wait" initial={false}>
           {feedback === "great" && (
@@ -82,6 +112,169 @@ export const FeedbackCard = ({
         />
       )}
     </motion.div>
+  )
+}
+
+/* ---------- Variant B: split picker ---------- */
+
+const SplitFeedbackPicker = ({ onPick }) => {
+  // "Sounded great" is the happy default — purple emphasis, suggestive that
+  // this is where most users land. "Needs some work" is the quieter option:
+  // plain white card with a grayscale icon so it doesn't compete.
+  const options = [
+    {
+      id: "great",
+      icon: HandThumbUpIcon,
+      label: "Sounded great",
+      sub: "Rosie nailed it.",
+      bg: "bg-gradient-to-br from-purple-25 to-white",
+      border: "border-purple-200",
+      iconBg: "bg-purple-100",
+      iconColor: "text-purple-700",
+    },
+    {
+      id: "work",
+      icon: WrenchScrewdriverIcon,
+      label: "Needs some work",
+      sub: "A few things to tune.",
+      bg: "bg-white",
+      border: "border-gray-200",
+      iconBg: "bg-gray-100",
+      iconColor: "text-gray-600",
+    },
+  ]
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+      {options.map((opt, idx) => {
+        const Icon = opt.icon
+        return (
+          <motion.button
+            key={opt.id}
+            type="button"
+            initial={{ y: 8, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{
+              delay: 0.05 + idx * 0.05,
+              duration: 0.3,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            whileHover={{ y: -2 }}
+            onClick={() => onPick(opt.id)}
+            className={`group rounded-2xl border ${opt.border} ${opt.bg} hover:border-purple-600 cursor-pointer transition-colors p-5 flex flex-col items-center text-center gap-2`}
+          >
+            <span
+              className={`size-12 rounded-full ${opt.iconBg} flex items-center justify-center`}
+            >
+              <Icon className={`size-6 ${opt.iconColor} stroke-[2]`} />
+            </span>
+            <p className="text-[15px] font-bold text-black tracking-[-0.01em]">
+              {opt.label}
+            </p>
+            <p className="text-[12.5px] font-medium text-gray-700 tracking-[-0.01em]">
+              {opt.sub}
+            </p>
+          </motion.button>
+        )
+      })}
+    </div>
+  )
+}
+
+/* ---------- Variant C: ready by default + tweak accordion ---------- */
+
+const ReadyByDefault = ({
+  onGoLive,
+  onTestAgain,
+  askedTransfer,
+  askedAppointment,
+  showCallDetails,
+}) => {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="flex flex-col gap-3">
+      <motion.div
+        layout
+        initial={{ y: 16, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className={`relative bg-white rounded-[20px] ${CARD_SHADOW} flex flex-col overflow-hidden`}
+      >
+        <div className="relative flex flex-col items-center gap-6 text-center px-6 py-9 sm:px-8 sm:py-12">
+          <Confetti intensity="celebrate" delay={150} />
+          <p className="relative text-[18px] sm:text-[19px] font-semibold text-black tracking-[-0.02em] leading-[1.4] max-w-[440px]">
+            Connect Rosie to a live plan so your customers can start calling
+            in.
+          </p>
+          <PrimaryCTA onClick={onGoLive} label={CTA_LABEL} />
+        </div>
+        {showCallDetails && (
+          <CallDetailsFooter
+            askedTransfer={askedTransfer}
+            askedAppointment={askedAppointment}
+          />
+        )}
+      </motion.div>
+
+      <motion.div
+        layout
+        initial={{ y: 16, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{
+          duration: 0.35,
+          delay: 0.05,
+          ease: [0.16, 1, 0.3, 1],
+        }}
+        className={`bg-white rounded-[20px] ${CARD_SHADOW} overflow-hidden`}
+      >
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="w-full flex items-center justify-between gap-3 px-5 sm:px-6 py-4 cursor-pointer hover:bg-gray-25 transition-colors"
+        >
+          <span className="flex items-center gap-2.5">
+            <span className="size-8 rounded-full bg-purple-100 flex items-center justify-center">
+              <WrenchScrewdriverIcon className="size-4 text-purple-700 stroke-[2]" />
+            </span>
+            <span className="flex flex-col items-start gap-0">
+              <span className="text-[14px] font-semibold text-black tracking-[-0.01em]">
+                Still want to fine-tune Rosie?
+              </span>
+              <span className="text-[12.5px] font-medium text-gray-700 tracking-[-0.01em]">
+                Tweak greeting, voice, pronunciations, and more
+              </span>
+            </span>
+          </span>
+          <motion.span
+            animate={{ rotate: open ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+            className="text-gray-700 shrink-0"
+          >
+            <ChevronDownIcon className="size-5 stroke-[2]" />
+          </motion.span>
+        </button>
+        <AnimatePresence initial={false}>
+          {open && (
+            <motion.div
+              key="tweak-body"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="border-t border-gray-100 p-5 sm:p-6">
+                <WorkPath
+                  onGoLive={onGoLive}
+                  onTestAgain={onTestAgain}
+                  askedTransfer={askedTransfer}
+                  askedAppointment={askedAppointment}
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </div>
   )
 }
 
@@ -138,36 +331,38 @@ const FeedbackToggle = ({ feedback, setFeedback }) => {
   const noSelection = feedback === null || feedback === undefined
 
   return (
-    <div className="relative inline-flex p-1 bg-purple-50 rounded-full border border-purple-200 w-full max-w-[360px]">
-      {options.map((opt) => {
-        const active = feedback === opt.id
-        // No selection yet → both options bold + full opacity (inviting).
-        // After a pick → active stays bold, inactive drops to weight 500 / 0.8.
-        const emphasized = noSelection || active
-        return (
-          <button
-            key={opt.id}
-            type="button"
-            onClick={() => setFeedback(opt.id)}
-            className="relative flex-1 px-4 py-2 rounded-full cursor-pointer z-10"
-          >
-            {active && (
-              <motion.span
-                layoutId="feedback-toggle-pill"
-                transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                className="absolute inset-0 bg-white rounded-full shadow-[0_1px_2px_0_rgba(16,24,40,0.08),0_0_0_1px_rgba(42,20,60,0.06)]"
-              />
-            )}
-            <span
-              className={`relative text-md text-purple-700 tracking-[-0.01em] transition-all ${
-                emphasized ? "font-bold opacity-100" : "font-medium opacity-80"
-              }`}
+    <div className="attention-ring rounded-full p-[1.5px] w-full max-w-[360px]">
+      <div className="relative inline-flex p-1 bg-purple-50 rounded-full w-full">
+        {options.map((opt) => {
+          const active = feedback === opt.id
+          // No selection yet → both options bold + full opacity (inviting).
+          // After a pick → active stays bold, inactive drops to weight 500 / 0.8.
+          const emphasized = noSelection || active
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => setFeedback(opt.id)}
+              className="relative flex-1 px-4 py-2 rounded-full cursor-pointer z-10"
             >
-              {opt.label}
-            </span>
-          </button>
-        )
-      })}
+              {active && (
+                <motion.span
+                  layoutId="feedback-toggle-pill"
+                  transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                  className="absolute inset-0 bg-white rounded-full shadow-[0_1px_2px_0_rgba(16,24,40,0.08),0_0_0_1px_rgba(42,20,60,0.06)]"
+                />
+              )}
+              <span
+                className={`relative text-md text-purple-700 tracking-[-0.01em] transition-all ${
+                  emphasized ? "font-bold opacity-100" : "font-medium opacity-80"
+                }`}
+              >
+                {opt.label}
+              </span>
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -294,7 +489,10 @@ const WorkPath = ({ onGoLive, askedTransfer, askedAppointment }) => {
         ))}
       </div>
 
-      <TestAgainBanner onGoLive={onGoLive} />
+      <TestAgainBanner
+        onGoLive={onGoLive}
+        hasEdits={Object.keys(editedTiles).length > 0}
+      />
 
       <Modal
         open={openModal === "pronounce"}
@@ -337,21 +535,49 @@ const WorkPath = ({ onGoLive, askedTransfer, askedAppointment }) => {
   )
 }
 
-const TestAgainBanner = ({ onGoLive }) => (
-  <div className="rounded-2xl bg-gradient-to-br from-purple-100 via-purple-50 to-purple-100 border border-purple-200 p-4 sm:p-5 flex flex-col items-center gap-3">
-    <p className="text-[13.5px] font-medium text-gray-700 tracking-[-0.01em] leading-[1.5] text-center max-w-[440px]">
-      Make changes above to tune how your agent understands your business — then
-      test the call again and go live.
-    </p>
+const TestAgainBanner = ({ onGoLive, hasEdits = false }) => (
+  <motion.div
+    layout
+    className="rounded-2xl bg-gradient-to-br from-purple-100 via-purple-50 to-purple-100 border border-purple-200 p-4 sm:p-5 flex flex-col items-center gap-3"
+  >
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.p
+        key={hasEdits ? "post" : "pre"}
+        initial={{ opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -4 }}
+        transition={{ duration: 0.2 }}
+        className="text-[13.5px] font-medium text-gray-700 tracking-[-0.01em] leading-[1.5] text-center max-w-[460px]"
+      >
+        {hasEdits ? (
+          <>
+            <span className="font-semibold text-black">
+              Rosie&apos;s updated with your changes.
+            </span>{" "}
+            Make another test call to try it out — or go live when you&apos;re
+            ready.
+          </>
+        ) : (
+          <>
+            Make changes above to tune how your agent understands your business
+            — then test the call again and go live.
+          </>
+        )}
+      </motion.p>
+    </AnimatePresence>
     <CallPill size="default" />
-    <button
-      type="button"
-      onClick={onGoLive}
-      className="text-[13px] font-medium text-gray-700 tracking-[-0.01em] cursor-pointer hover:text-black underline"
-    >
-      Ready? Go live →
-    </button>
-  </div>
+    {hasEdits ? (
+      <PrimaryCTA onClick={onGoLive} label="Ready? Go live" />
+    ) : (
+      <button
+        type="button"
+        onClick={onGoLive}
+        className="text-[13px] font-medium text-gray-700 tracking-[-0.01em] cursor-pointer hover:text-black underline"
+      >
+        Ready? Go live →
+      </button>
+    )}
+  </motion.div>
 )
 
 const TuneTile = ({ tile, index, edited, onClick }) => {

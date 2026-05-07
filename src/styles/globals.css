@@ -51,8 +51,36 @@ html, body {
   animation: phone-glow 1.6s ease-out infinite;
 }
 
-/* DialKit ships with a preset/version manager in the panel toolbar — we don't
-   use versions in this prototype, so hide the row entirely. */
-.dialkit-preset-manager {
+/* DialKit's panel toolbar is entirely about preset/version management, which
+   we don't use in this prototype — hide the whole toolbar. */
+.dialkit-panel-toolbar {
   display: none !important;
+}
+
+/* Rotating conic-gradient ring used to draw attention to a control. Apply to
+   a wrapper with padding equal to the desired ring thickness; the inner child
+   covers the center, leaving only the padding showing the rotating gradient.
+   Uses @property so the angle CSS var animates smoothly. */
+@property --attention-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes attention-spin {
+  to {
+    --attention-angle: 360deg;
+  }
+}
+
+.attention-ring {
+  background: conic-gradient(
+    from var(--attention-angle),
+    var(--color-purple-200),
+    var(--color-purple-700),
+    var(--color-purple-300),
+    var(--color-purple-600),
+    var(--color-purple-200)
+  );
+  animation: attention-spin 3.5s linear infinite;
 }

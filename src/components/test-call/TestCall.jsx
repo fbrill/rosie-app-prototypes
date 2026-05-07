@@ -13,6 +13,7 @@ const TestCall = () => {
     callState,
     feedback,
     setFeedback,
+    endScenario,
     askedTransfer,
     askedAppointment,
     showCallDetails,
@@ -22,7 +23,7 @@ const TestCall = () => {
 
   return (
     <PageShell>
-      <Hero callState={callState} />
+      <Hero callState={callState} variant={endScenario} />
       {callState !== "complete" && <CallCard callState={callState} />}
 
       <AnimatePresence>
@@ -36,6 +37,7 @@ const TestCall = () => {
             className="flex flex-col gap-4 mt-4"
           >
             <FeedbackCard
+              variant={endScenario}
               feedback={feedback}
               setFeedback={setFeedback}
               onGoLive={goToPricing}
