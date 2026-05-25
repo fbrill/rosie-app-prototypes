@@ -75,7 +75,7 @@ export default function GlobalSidebar() {
           Refer and Earn
         </a>
 
-        <div className="rounded-[10px] bg-white px-4 py-3 text-center">
+        <div className="rounded-[10px] bg-gray-100 px-2 py-4 text-center">
           <p className="text-base font-medium leading-snug text-black">
             (954) 333-3343
           </p>

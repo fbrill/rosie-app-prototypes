@@ -17,7 +17,13 @@ const LABELS = { chat: "Website Chat", texting: "Website Texting" }
  * @param {"chat"|"texting"} from - currently active channel
  * @param {"chat"|"texting"} to   - channel being switched to
  */
-export default function ConfirmSwitchModal({ open, onClose, onConfirm, from, to }) {
+export default function ConfirmSwitchModal({
+  open,
+  onClose,
+  onConfirm,
+  from,
+  to,
+}) {
   useEffect(() => {
     if (!open) return
     const onKey = (e) => e.key === "Escape" && onClose()
@@ -38,7 +44,7 @@ export default function ConfirmSwitchModal({ open, onClose, onConfirm, from, to 
           exit={{ opacity: 0 }}
           transition={{ duration: 0.18 }}
           onClick={onClose}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/45 p-4 backdrop-blur-[2px]"
         >
           <motion.div
             initial={{ scale: 0.96, y: 8, opacity: 0 }}
@@ -55,7 +61,8 @@ export default function ConfirmSwitchModal({ open, onClose, onConfirm, from, to 
                 </h2>
                 <p className="text-[13px] font-medium tracking-[-0.01em] text-gray-700">
                   This replaces your active {fromLabel} widget on your site.
-                  Visitors will see the new widget immediately. {/* placeholder copy */}
+                  Visitors will see the new widget immediately.{" "}
+                  {/* placeholder copy */}
                 </p>
               </div>
               <button

@@ -92,7 +92,7 @@ export default function GlobalSidebar() {
           Refer and Earn
         </a>
 
-        <div className="rounded-[10px] bg-white px-4 py-3 text-center">
+        <div className="rounded-[10px] bg-gray-50 px-4 py-3 text-center">
           <p className="text-xs font-semibold uppercase tracking-wider text-gray-700">
             Your Rosie number
           </p>
