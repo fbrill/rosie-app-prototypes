@@ -6,7 +6,7 @@ export default function App({ Component, pageProps }) {
   return (
     <>
       <Component {...pageProps} />
-      <DialRoot productionEnabled />
+      <DialRoot productionEnabled position="top-left" />
     </>
   );
 }
