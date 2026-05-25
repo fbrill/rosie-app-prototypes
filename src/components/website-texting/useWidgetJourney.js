@@ -7,12 +7,13 @@ const PROVISIONING_DELAY_MS = 2500
 /**
  * Stage machine for the Website Widgets activation journey. One widget runs at a
  * time; the user clicks from the default (Website Chat) through comparing,
- * enabling the $50/mo add-on, and provisioning the SMS number, then can switch
- * back to chat.
+ * enabling the $50/mo add-on (straight from the compare table), and provisioning
+ * the SMS number, then can switch back to chat. Activating texting or switching
+ * channels marks an unpublished change (drives the header Publish button).
  *
- *   chat → compare → addon → texting-inactive
+ *   chat → compare → texting-inactive
  *        activateNumber(): inactive → inprogress → (timer) → active
- *   texting-active ⇄ chat
+ *   texting-active ⇄ chat   (each switch → pending publish)
  *
  * DialKit action buttons jump straight to any stage *statically* (no timers) so
  * each state — including the three number states — can be inspected/screenshotted.
@@ -22,11 +23,23 @@ export function useWidgetJourney() {
   // Once the add-on has been enabled + number activated, later chat⇄texting
   // switches are instant (no re-setup), matching "switching is instant".
   const [addonProvisioned, setAddonProvisioned] = useState(false)
+  // Whether the live widget has an unpublished change (drives the header
+  // Publish button). The nonce bumps on every change so the button re-arms
+  // even when one pending change immediately follows another.
+  const [pendingPublish, setPendingPublish] = useState(false)
+  const [publishNonce, setPublishNonce] = useState(0)
   const timersRef = useRef([])
 
   const clearTimers = () => {
     timersRef.current.forEach(clearTimeout)
     timersRef.current = []
+  }
+
+  // Flag an unpublished change to the live widget (activating texting or
+  // switching channels) and re-arm the Publish button.
+  const markPending = () => {
+    setPendingPublish(true)
+    setPublishNonce((n) => n + 1)
   }
 
   // --- Click-path transitions -------------------------------------------------
@@ -43,6 +56,7 @@ export function useWidgetJourney() {
       setTimeout(() => {
         setAddonProvisioned(true)
         setStage("texting-active")
+        markPending() // texting is now live → publish
       }, PROVISIONING_DELAY_MS),
     )
   }
@@ -50,12 +64,14 @@ export function useWidgetJourney() {
   const switchToChat = () => {
     clearTimers()
     setStage("chat")
+    markPending() // reverting to chat is also a change → publish
   }
 
   // After provisioning, jump straight to live texting (no compare/add-on steps).
   const switchToTexting = () => {
     clearTimers()
     setStage("texting-active")
+    markPending()
   }
 
   // --- DialKit static jumps ---------------------------------------------------
@@ -75,23 +91,29 @@ export function useWidgetJourney() {
         switch (action) {
           case "goChat":
             setStage("chat")
+            setPendingPublish(false)
             break
           case "goCompare":
             setStage("compare")
+            setPendingPublish(false)
             break
           case "goNumberInactive":
             setStage("texting-inactive")
+            setPendingPublish(false)
             break
           case "goNumberInProgress":
             setStage("texting-inprogress")
+            setPendingPublish(false)
             break
           case "goTextingActive":
             setAddonProvisioned(true)
             setStage("texting-active")
+            markPending()
             break
           case "reset":
             setAddonProvisioned(false)
             setStage("chat")
+            setPendingPublish(false)
             break
           default:
             break
@@ -118,6 +140,8 @@ export function useWidgetJourney() {
     numberStatus,
     previewType,
     addonProvisioned,
+    pendingPublish,
+    publishNonce,
     // click handlers
     openCompare,
     closeCompare,

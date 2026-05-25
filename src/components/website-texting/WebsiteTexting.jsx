@@ -66,7 +66,10 @@ export default function WebsiteTexting() {
           className="flex min-w-0 flex-1 flex-col gap-2.5"
           aria-label="Website Widgets settings"
         >
-          <PageHeader />
+          <PageHeader
+            ready={journey.pendingPublish}
+            changeKey={journey.publishNonce}
+          />
 
           <AnimatePresence mode="wait">
             <motion.div

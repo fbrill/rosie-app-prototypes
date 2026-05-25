@@ -16,7 +16,7 @@ function StatusFooter({ status, onActivate }) {
       <button
         type="button"
         onClick={onActivate}
-        className="self-start rounded-full bg-purple-700 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-600"
+        className="phone-glow self-start rounded-full bg-purple-700 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-600"
       >
         Activate number
       </button>
