@@ -1,0 +1,139 @@
+import {
+  ChatBubbleOvalLeftEllipsisIcon,
+  CursorArrowRaysIcon,
+  QuestionMarkCircleIcon,
+  SparklesIcon,
+  ArrowRightIcon,
+  ArrowTopRightOnSquareIcon,
+  ExclamationCircleIcon,
+} from "@heroicons/react/24/outline"
+import SectionCard from "./SectionCard"
+import { ActiveBadge } from "./Badge"
+import HowItWorks from "./HowItWorks"
+
+const CHAT_STEPS = [
+  {
+    n: 1,
+    icon: CursorArrowRaysIcon,
+    title: "Visitor opens chat",
+    body: "A bubble appears in the corner of your site.",
+  },
+  {
+    n: 2,
+    icon: QuestionMarkCircleIcon,
+    title: "They ask a question",
+    body: "Hours, pricing, services — anything.",
+  },
+  {
+    n: 3,
+    icon: SparklesIcon,
+    title: "Rosie answers",
+    body: "Instantly, from your training.",
+  },
+  {
+    n: 4,
+    icon: ExclamationCircleIcon,
+    title: "They close the tab",
+    body: "The conversation ends — and you never know who they were.",
+    muted: true,
+  },
+]
+
+/**
+ * The default Website Chat card: included-free + active, an anonymous-Q&A
+ * explainer, and a bottom upsell row toward Website Texting.
+ *
+ * @param {() => void} onCompare        - open the compare takeover
+ * @param {() => void} onSwitchToTexting - instant switch (only once provisioned)
+ * @param {boolean} provisioned          - whether texting is already set up
+ */
+export default function ChatWidgetCard({
+  onCompare,
+  onSwitchToTexting,
+  provisioned,
+}) {
+  return (
+    <SectionCard
+      icon={ChatBubbleOvalLeftEllipsisIcon}
+      title="Website Chat"
+      headerRight={
+        <div className="flex items-center gap-2.5">
+          <ActiveBadge />
+        </div>
+      }
+    >
+      <div className="flex flex-col gap-6 p-6">
+        <p className="text-sm text-gray-700">
+          Visitors get instant answers to common questions through a chat bubble
+          on your website. Rosie responds anonymously — no name or phone
+          collected.
+        </p>
+
+        <HowItWorks steps={CHAT_STEPS} />
+      </div>
+
+      {/* Upsell row */}
+      <div className="bg-gradient-to-t from-purple-200 to-purple-100 rounded-b-[12px]">
+        <div
+          className="bg-white rounded-b-[12px] p-2"
+          style={{
+            boxShadow:
+              "0px 8px 16px -4px rgba(16, 24, 40, 0.06), 0px 2px 6px -2px rgba(16, 24, 40, 0.03)",
+          }}
+        />
+        <div className="flex flex-wrap items-center gap-4 px-6 py-5 ">
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-t from-purple-700 to-purple-600">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M2.25 12.7593C2.25 14.3604 3.37341 15.754 4.95746 15.987C6.08596 16.1529 7.22724 16.2796 8.37985 16.3655C8.73004 16.3916 9.05017 16.5753 9.24496 16.8674L12 21L14.755 16.8675C14.9498 16.5753 15.2699 16.3917 15.6201 16.3656C16.7727 16.2796 17.914 16.153 19.0425 15.9871C20.6266 15.7542 21.75 14.3606 21.75 12.7595V6.74056C21.75 5.13946 20.6266 3.74583 19.0425 3.51293C16.744 3.17501 14.3926 3 12.0003 3C9.60776 3 7.25612 3.17504 4.95747 3.51302C3.37342 3.74593 2.25 5.13956 2.25 6.74064V12.7593Z"
+                stroke="white"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M6 8.37305C6 7.63086 6.59375 7 7.33594 7H8.07812C8.375 7 8.67188 7.29688 8.67188 7.59375C8.67188 7.92773 8.375 8.1875 8.07812 8.1875H7.33594C7.26172 8.1875 7.1875 8.29883 7.1875 8.37305C7.1875 8.44727 7.1875 8.48438 7.26172 8.52148L8.33789 9.26367C8.70898 9.52344 8.96875 9.93164 8.96875 10.4141C8.96875 11.1562 8.33789 11.75 7.5957 11.75H6.59375C6.25977 11.75 6 11.4902 6 11.1562C6 10.8594 6.25977 10.5625 6.59375 10.5625H7.5957C7.66992 10.5625 7.78125 10.4883 7.78125 10.4141C7.78125 10.3398 7.74414 10.2656 7.66992 10.2656L6.59375 9.52344C6.22266 9.26367 6 8.85547 6 8.37305ZM16.2422 7H16.9844C17.2812 7 17.5781 7.29688 17.5781 7.59375C17.5781 7.92773 17.2812 8.1875 16.9844 8.1875H16.2422C16.168 8.1875 16.0938 8.29883 16.0938 8.37305C16.0938 8.44727 16.0938 8.48438 16.168 8.52148L17.2441 9.26367C17.6152 9.52344 17.875 9.93164 17.875 10.4141C17.875 11.1562 17.2441 11.75 16.502 11.75H15.5C15.166 11.75 14.9062 11.4902 14.9062 11.1562C14.9062 10.8594 15.166 10.5625 15.5 10.5625H16.502C16.5762 10.5625 16.6875 10.4883 16.6875 10.4141C16.6875 10.3398 16.6504 10.2656 16.5762 10.2656L15.5 9.52344C15.1289 9.26367 14.9062 8.85547 14.9062 8.37305C14.9062 7.63086 15.5 7 16.2422 7ZM10.6016 7.25977L11.9375 9.00391L13.2363 7.25977C13.3848 7.03711 13.6445 6.96289 13.9043 7.03711C14.127 7.11133 14.3125 7.37109 14.3125 7.59375V11.1562C14.3125 11.4902 14.0156 11.75 13.7188 11.75C13.3848 11.75 13.125 11.4902 13.125 11.1562V9.375L12.3828 10.3398C12.2715 10.4883 12.123 10.5625 11.9375 10.5625C11.752 10.5625 11.5664 10.4883 11.4551 10.3398L10.75 9.375V11.1562C10.75 11.4902 10.4531 11.75 10.1562 11.75C9.82227 11.75 9.5625 11.4902 9.5625 11.1562V7.59375C9.5625 7.37109 9.71094 7.11133 9.93359 7.03711C10.1934 6.96289 10.4531 7.03711 10.6016 7.25977Z"
+                fill="white"
+              />
+            </svg>
+          </span>
+          <div className="min-w-[220px] flex-1">
+            <p className="text-base font-semibold text-black">
+              Want to keep the conversation going?
+            </p>
+            <p className="text-sm text-gray-900">
+              Upgrade to Website Texting — capture name &amp; phone and continue
+              over SMS, even after they leave your site.{" "}
+              <span className="font-semibold text-purple-700">$50/mo</span>.
+            </p>
+          </div>
+          {provisioned ? (
+            <button
+              type="button"
+              onClick={onSwitchToTexting}
+              className="flex shrink-0 items-center gap-1.5 rounded-full bg-purple-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-purple-600"
+            >
+              Switch to Website Texting
+              <ArrowRightIcon className="size-4" strokeWidth={2} />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onCompare}
+              className="flex shrink-0 items-center gap-1.5 rounded-full border border-purple-300 bg-white px-5 py-2.5 text-sm font-semibold text-purple-700 hover:bg-purple-50"
+            >
+              Compare Widgets
+              <ArrowRightIcon className="size-4" strokeWidth={2} />
+            </button>
+          )}
+        </div>
+      </div>
+    </SectionCard>
+  )
+}

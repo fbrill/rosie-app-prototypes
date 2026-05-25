@@ -1,26 +1,106 @@
+"use client"
+
+import { useState } from "react"
+import { AnimatePresence, motion } from "motion/react"
+import { EyeIcon } from "@heroicons/react/24/outline"
 import GlobalSidebar from "./GlobalSidebar"
 import SettingsNav from "./SettingsNav"
 import PageHeader from "./PageHeader"
-import WidgetTypeCard from "./WidgetTypeCard"
-import TextingSettingsCard from "./TextingSettingsCard"
+import SectionCard from "./SectionCard"
+import WidgetPreview from "./WidgetPreview"
+import ConfirmSwitchModal from "./ConfirmSwitchModal"
+import ChatWidgetCard from "./ChatWidgetCard"
+import TextingWidgetCard from "./TextingWidgetCard"
+import CompareView from "./CompareView"
+import { useWidgetJourney } from "./useWidgetJourney"
 
 /**
- * Agent Settings → Website Widgets page. Full app shell (global sidebar +
- * settings sub-nav + content) exploring the layout of the Website Texting
- * widget type. Foundation only — interactions/options come in a later pass.
+ * Agent Settings → Website Widgets. Full app shell wrapping a single
+ * click-through journey: Website Chat (default, included) → compare → enable the
+ * $50/mo Website Texting add-on → provision the SMS number → live texting, and
+ * back. A DialKit panel jumps to any state for review. The live widget preview
+ * sits in its own container below, except during the compare takeover.
  */
 export default function WebsiteTexting() {
+  const journey = useWidgetJourney()
+  const [confirmSwitchToChat, setConfirmSwitchToChat] = useState(false)
+
+  const { stage } = journey
+  const isCompare = stage === "compare"
+
+  const renderMain = () => {
+    if (isCompare) {
+      return (
+        <CompareView
+          onBack={journey.closeCompare}
+          onUpgrade={journey.upgrade}
+          provisioned={journey.addonProvisioned}
+        />
+      )
+    }
+    if (stage === "chat") {
+      return (
+        <ChatWidgetCard
+          provisioned={journey.addonProvisioned}
+          onCompare={journey.openCompare}
+          onSwitchToTexting={journey.switchToTexting}
+        />
+      )
+    }
+    return (
+      <TextingWidgetCard
+        stage={stage}
+        numberStatus={journey.numberStatus}
+        onActivateNumber={journey.activateNumber}
+        onSwitchToChat={() => setConfirmSwitchToChat(true)}
+      />
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-200 p-2.5">
       <div className="flex items-start gap-2.5">
         <GlobalSidebar />
         <SettingsNav />
-        <main className="flex min-w-0 flex-1 flex-col gap-2.5" aria-label="Website Widgets settings">
+        <main
+          className="flex min-w-0 flex-1 flex-col gap-2.5"
+          aria-label="Website Widgets settings"
+        >
           <PageHeader />
-          <WidgetTypeCard />
-          <TextingSettingsCard />
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={isCompare ? "compare" : "widget"}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              className="flex flex-col gap-2.5"
+            >
+              {renderMain()}
+
+              {!isCompare && (
+                <SectionCard icon={EyeIcon} title="Live preview">
+                  <div className="p-6">
+                    <WidgetPreview type={journey.previewType} />
+                  </div>
+                </SectionCard>
+              )}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
+
+      <ConfirmSwitchModal
+        open={confirmSwitchToChat}
+        from="texting"
+        to="chat"
+        onClose={() => setConfirmSwitchToChat(false)}
+        onConfirm={() => {
+          journey.switchToChat()
+          setConfirmSwitchToChat(false)
+        }}
+      />
     </div>
   )
 }
