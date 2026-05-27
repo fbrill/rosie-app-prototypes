@@ -149,5 +149,6 @@ export function useWidgetJourney() {
     activateNumber,
     switchToChat,
     switchToTexting,
+    markPending,
   }
 }

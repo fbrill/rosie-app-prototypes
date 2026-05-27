@@ -3,10 +3,10 @@ import {
   ArrowRightIcon,
   CheckIcon,
   XMarkIcon,
-  InformationCircleIcon,
   ChatBubbleOvalLeftEllipsisIcon,
   ChatBubbleLeftRightIcon,
 } from "@heroicons/react/24/outline"
+import InfoBanner from "./InfoBanner"
 
 const CHAT_FEATURES = [
   { label: "Instant answers, 24/7", yes: true },
@@ -177,21 +177,14 @@ export default function CompareView({ onBack, onUpgrade, provisioned }) {
       </div>
 
       {/* Reassurance footnote */}
-      <div className="mt-5 flex items-start gap-2 rounded-[10px] border border-gray-200 bg-gray-25 p-4">
-        <InformationCircleIcon
-          className="size-5 shrink-0 text-gray-600"
-          strokeWidth={1.5}
-        />
-        <div>
-          <p className="text-sm font-semibold text-black">
-            You can only run one widget at a time
-          </p>
-          <p className="text-sm text-gray-700">
-            Switching is instant and doesn&apos;t require a new install — your
-            existing snippet stays on your site.
-          </p>
-        </div>
-      </div>
+      <InfoBanner
+        variant="card"
+        title="You can only run one widget at a time"
+        className="mt-5"
+      >
+        Switching is instant and doesn&apos;t require a new install — your
+        existing snippet stays on your site.
+      </InfoBanner>
     </section>
   )
 }

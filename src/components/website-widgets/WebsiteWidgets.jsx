@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
-import { EyeIcon } from "@heroicons/react/24/outline"
 import GlobalSidebar from "./GlobalSidebar"
 import SettingsNav from "./SettingsNav"
 import PageHeader from "./PageHeader"
@@ -12,7 +11,12 @@ import ConfirmSwitchModal from "./ConfirmSwitchModal"
 import ChatWidgetCard from "./ChatWidgetCard"
 import TextingWidgetCard from "./TextingWidgetCard"
 import CompareView from "./CompareView"
+import InstallationCard from "./InstallationCard"
+import InfoBanner from "./InfoBanner"
+import CustomizationModal from "./CustomizationModal"
 import { useWidgetJourney } from "./useWidgetJourney"
+import { useWidgetCustomization } from "./useWidgetCustomization"
+import { SwatchIcon, PencilSquareIcon } from "@heroicons/react/24/outline"
 
 /**
  * Agent Settings → Website Widgets. Full app shell wrapping a single
@@ -23,7 +27,9 @@ import { useWidgetJourney } from "./useWidgetJourney"
  */
 export default function WebsiteWidgets() {
   const journey = useWidgetJourney()
+  const customization = useWidgetCustomization()
   const [confirmSwitchToChat, setConfirmSwitchToChat] = useState(false)
+  const [customizeOpen, setCustomizeOpen] = useState(false)
 
   const { stage } = journey
   const isCompare = stage === "compare"
@@ -83,11 +89,40 @@ export default function WebsiteWidgets() {
               {renderMain()}
 
               {!isCompare && (
-                <SectionCard icon={EyeIcon} title="Live preview">
-                  <div className="p-6">
-                    <WidgetPreview type={journey.previewType} />
-                  </div>
-                </SectionCard>
+                <>
+                  <SectionCard
+                    icon={SwatchIcon}
+                    title="Website Widget Customization"
+                  >
+                    <InfoBanner>
+                      Customize the look of the widget that will display on your
+                      website.
+                    </InfoBanner>
+                    <div className="p-6">
+                      <WidgetPreview
+                        type={journey.previewType}
+                        settings={customization.settings}
+                      />
+                    </div>
+
+                    {/* Footer: edit appearance */}
+                    <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 bg-gray-25 px-6 py-4">
+                      <button
+                        type="button"
+                        onClick={() => setCustomizeOpen(true)}
+                        className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-purple-100 px-4 py-2 text-sm font-semibold text-purple-700 transition-colors hover:bg-purple-200"
+                      >
+                        <PencilSquareIcon
+                          className="size-[18px]"
+                          strokeWidth={2}
+                        />
+                        Edit
+                      </button>
+                    </div>
+                  </SectionCard>
+
+                  <InstallationCard />
+                </>
               )}
             </motion.div>
           </AnimatePresence>
@@ -102,6 +137,18 @@ export default function WebsiteWidgets() {
         onConfirm={() => {
           journey.switchToChat()
           setConfirmSwitchToChat(false)
+        }}
+      />
+
+      <CustomizationModal
+        open={customizeOpen}
+        type={journey.previewType}
+        settings={customization.settings}
+        onCancel={() => setCustomizeOpen(false)}
+        onSave={(next) => {
+          customization.save(next)
+          journey.markPending()
+          setCustomizeOpen(false)
         }}
       />
     </div>
