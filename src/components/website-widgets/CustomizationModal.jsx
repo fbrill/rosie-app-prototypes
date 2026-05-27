@@ -178,7 +178,10 @@ export default function CustomizationModal({
             <div className="flex min-h-0 flex-1 flex-col md:flex-row">
               {/* Form */}
               <div className="flex w-full flex-col gap-6 overflow-y-auto px-6 py-6 md:w-[430px] md:shrink-0">
-                <Row label="Primary Color" sublabel="Used on buttons & headers.">
+                <Row
+                  label="Primary Color"
+                  sublabel="Used on buttons & headers."
+                >
                   <div className="flex items-center gap-2">
                     <label className="relative block size-9 cursor-pointer overflow-hidden rounded-lg border border-gray-300">
                       <span
@@ -270,7 +273,7 @@ export default function CustomizationModal({
                 <div className="relative flex min-h-[520px] flex-1 flex-col overflow-hidden rounded-[16px] border border-gray-200 bg-gradient-to-b from-slate-50 to-slate-200 p-5">
                   {/* Header bar — sits inside the gradient */}
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-sm font-bold uppercase tracking-[0.12em] text-black">
+                    <span className="text-sm font-medium uppercase tracking-wide text-black">
                       Preview
                     </span>
                     <div className="inline-flex items-center rounded-full bg-white p-1 shadow-[0_1px_3px_rgba(16,24,40,0.12)]">
@@ -297,7 +300,8 @@ export default function CustomizationModal({
                   {/* Widget area — positioned per the chosen corner */}
                   <div
                     className={`flex flex-1 pt-6 ${
-                      POSITION_ALIGN[draft.position] ?? POSITION_ALIGN["bottom-right"]
+                      POSITION_ALIGN[draft.position] ??
+                      POSITION_ALIGN["bottom-right"]
                     }`}
                   >
                     {tab === "greeting" ? (
