@@ -19,10 +19,10 @@ const prototypes = [
       "Guided setup test call step with locked feedback card that unlocks after completing a call.",
   },
   {
-    slug: "website-texting",
-    name: "Website Texting",
+    slug: "website-widgets",
+    name: "Website Widgets",
     description:
-      "Agent Settings → Website Widgets page exploring the Website Texting widget type layout.",
+      "Agent Settings → Website Widgets page exploring the Website Chat and Website Texting widget type layouts.",
   },
 ]
 

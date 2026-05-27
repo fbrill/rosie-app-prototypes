@@ -21,7 +21,7 @@ import { useWidgetJourney } from "./useWidgetJourney"
  * back. A DialKit panel jumps to any state for review. The live widget preview
  * sits in its own container below, except during the compare takeover.
  */
-export default function WebsiteTexting() {
+export default function WebsiteWidgets() {
   const journey = useWidgetJourney()
   const [confirmSwitchToChat, setConfirmSwitchToChat] = useState(false)
 

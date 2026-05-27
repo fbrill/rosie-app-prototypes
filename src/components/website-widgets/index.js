@@ -1,4 +1,4 @@
-export { default as WebsiteTexting } from "./WebsiteTexting"
+export { default as WebsiteWidgets } from "./WebsiteWidgets"
 export { default as GlobalSidebar } from "./GlobalSidebar"
 export { default as SettingsNav } from "./SettingsNav"
 export { default as PageHeader } from "./PageHeader"
