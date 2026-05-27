@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react"
-import { useDialKit } from "dialkit"
 
 // Simulated SMS-number provisioning delay (In Progress → Active).
 const PROVISIONING_DELAY_MS = 2500
@@ -14,9 +13,6 @@ const PROVISIONING_DELAY_MS = 2500
  *   chat → compare → texting-inactive
  *        activateNumber(): inactive → inprogress → (timer) → active
  *   texting-active ⇄ chat   (each switch → pending publish)
- *
- * DialKit action buttons jump straight to any stage *statically* (no timers) so
- * each state — including the three number states — can be inspected/screenshotted.
  */
 export function useWidgetJourney() {
   const [stage, setStage] = useState("chat")
@@ -73,55 +69,6 @@ export function useWidgetJourney() {
     setStage("texting-active")
     markPending()
   }
-
-  // --- DialKit static jumps ---------------------------------------------------
-  const dk = useDialKit(
-    "Website Widgets",
-    {
-      goChat: { type: "action", label: "↦ Chat active (default)" },
-      goCompare: { type: "action", label: "↦ Compare view" },
-      goNumberInactive: { type: "action", label: "↦ Number: Inactive" },
-      goNumberInProgress: { type: "action", label: "↦ Number: In Progress" },
-      goTextingActive: { type: "action", label: "↦ Texting active" },
-      reset: { type: "action", label: "↺ Reset journey" },
-    },
-    {
-      onAction: (action) => {
-        clearTimers()
-        switch (action) {
-          case "goChat":
-            setStage("chat")
-            setPendingPublish(false)
-            break
-          case "goCompare":
-            setStage("compare")
-            setPendingPublish(false)
-            break
-          case "goNumberInactive":
-            setStage("texting-inactive")
-            setPendingPublish(false)
-            break
-          case "goNumberInProgress":
-            setStage("texting-inprogress")
-            setPendingPublish(false)
-            break
-          case "goTextingActive":
-            setAddonProvisioned(true)
-            setStage("texting-active")
-            markPending()
-            break
-          case "reset":
-            setAddonProvisioned(false)
-            setStage("chat")
-            setPendingPublish(false)
-            break
-          default:
-            break
-        }
-      },
-    },
-  )
-  void dk
 
   useEffect(() => () => clearTimers(), [])
 

@@ -22,8 +22,8 @@ import { SwatchIcon, PencilSquareIcon } from "@heroicons/react/24/outline"
  * Agent Settings → Website Widgets. Full app shell wrapping a single
  * click-through journey: Website Chat (default, included) → compare → enable the
  * $50/mo Website Texting add-on → provision the SMS number → live texting, and
- * back. A DialKit panel jumps to any state for review. The live widget preview
- * sits in its own container below, except during the compare takeover.
+ * back. The live widget preview sits in its own container below, except during
+ * the compare takeover.
  */
 export default function WebsiteWidgets() {
   const journey = useWidgetJourney()
