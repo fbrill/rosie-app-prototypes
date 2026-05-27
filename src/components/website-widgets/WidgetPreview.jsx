@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react"
 import {
   XMarkIcon,
   UserCircleIcon,
@@ -35,12 +36,36 @@ export const WELCOME_DEFAULTS = {
   chat: COPY.chat.greeting,
 }
 
+/**
+ * Pick a readable text color (black or white) for content sitting on top of
+ * `hex`, using the YIQ brightness formula. Falls back to black for invalid
+ * input (e.g. a half-typed hex). https://24ways.org/2010/calculating-color-contrast
+ */
+export function getAccessibleColor(hex) {
+  let color = hex?.replace(/#/g, "")
+  // Expand shorthand (#abc → aabbcc).
+  if (color?.length === 3) {
+    color = color
+      .split("")
+      .map((c) => c + c)
+      .join("")
+  }
+  if (!color || color.length !== 6 || /[^0-9a-f]/i.test(color)) return "#000000"
+  const r = parseInt(color.slice(0, 2), 16)
+  const g = parseInt(color.slice(2, 4), 16)
+  const b = parseInt(color.slice(4, 6), 16)
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000
+  return yiq >= 128 ? "#000000" : "#FFFFFF"
+}
+
 /** Merge customization settings over the per-type defaults. */
 function resolveSettings(settings, type) {
   const s = settings ?? {}
   const message = (s.welcomeMessage ?? "").trim()
+  const primaryColor = s.primaryColor || DEFAULT_PRIMARY
   return {
-    primaryColor: s.primaryColor || DEFAULT_PRIMARY,
+    primaryColor,
+    onPrimaryColor: getAccessibleColor(primaryColor),
     avatarUrl: s.avatarUrl || DEFAULT_AVATAR,
     greeting: message || COPY[type]?.greeting || COPY.texting.greeting,
   }
@@ -76,7 +101,10 @@ function Field({ icon: Icon, placeholder }) {
  */
 export function GreetingWidget({ type = "texting", settings }) {
   const copy = COPY[type] ?? COPY.texting
-  const { primaryColor, avatarUrl, greeting } = resolveSettings(settings, type)
+  const { primaryColor, onPrimaryColor, avatarUrl, greeting } = resolveSettings(
+    settings,
+    type,
+  )
   return (
     <div className="flex w-[200px] flex-col gap-3">
       <div className="flex flex-col gap-3 rounded-xl bg-white p-3 shadow-[0px_12px_24px_-8px_rgba(0,0,0,0.18)]">
@@ -90,17 +118,21 @@ export function GreetingWidget({ type = "texting", settings }) {
         <p className="text-[10px] leading-4 text-black">{greeting}</p>
         <button
           type="button"
-          className="flex items-center justify-center gap-1 rounded-md bg-black px-3.5 py-2 text-sm font-medium text-white"
+          className="flex items-center justify-center gap-1 rounded-md px-3.5 py-2 text-sm font-medium"
+          style={{ backgroundColor: primaryColor, color: onPrimaryColor }}
         >
-          <ChatBubbleOvalLeftEllipsisIcon className="size-5" strokeWidth={1.5} />
+          <ChatBubbleOvalLeftEllipsisIcon
+            className="size-5"
+            strokeWidth={1.5}
+          />
           {copy.collapsedCta}
         </button>
       </div>
 
       <button
         type="button"
-        className="ml-auto flex items-center gap-1 rounded-full px-4 py-2.5 text-sm font-medium text-black"
-        style={{ backgroundColor: primaryColor }}
+        className="ml-auto flex items-center gap-1 rounded-full px-4 py-2.5 text-sm font-medium"
+        style={{ backgroundColor: primaryColor, color: onPrimaryColor }}
       >
         <ChatBubbleOvalLeftEllipsisIcon className="size-5" strokeWidth={1.5} />
         {copy.launcher}
@@ -116,7 +148,10 @@ export function GreetingWidget({ type = "texting", settings }) {
  */
 export function ExpandedWidget({ type = "texting", settings }) {
   const copy = COPY[type] ?? COPY.texting
-  const { primaryColor, avatarUrl } = resolveSettings(settings, type)
+  const { primaryColor, onPrimaryColor, avatarUrl } = resolveSettings(
+    settings,
+    type,
+  )
   const isTexting = type === "texting"
   return (
     <div className="w-[330px] overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50 shadow-[0px_20px_40px_-12px_rgba(0,0,0,0.2)]">
@@ -124,11 +159,11 @@ export function ExpandedWidget({ type = "texting", settings }) {
         {/* Tinted header */}
         <div
           className="flex items-center gap-4 rounded-t-xl p-3"
-          style={{ backgroundColor: primaryColor }}
+          style={{ backgroundColor: primaryColor, color: onPrimaryColor }}
         >
           <Avatar size={40} src={avatarUrl} />
-          <p className="flex-1 text-sm font-bold text-black">{BUSINESS_NAME}</p>
-          <XMarkIcon className="size-4 text-black" />
+          <p className="flex-1 text-sm font-bold">{BUSINESS_NAME}</p>
+          <XMarkIcon className="size-4" />
         </div>
 
         {/* Body */}
@@ -150,10 +185,13 @@ export function ExpandedWidget({ type = "texting", settings }) {
 
           <button
             type="button"
-            className="flex items-center justify-center gap-1 rounded-lg px-3.5 py-2.5 text-sm font-semibold text-black"
-            style={{ backgroundColor: primaryColor }}
+            className="flex items-center justify-center gap-1 rounded-lg px-3.5 py-2.5 text-sm font-semibold"
+            style={{ backgroundColor: primaryColor, color: onPrimaryColor }}
           >
-            <ChatBubbleOvalLeftEllipsisIcon className="size-5" strokeWidth={1.5} />
+            <ChatBubbleOvalLeftEllipsisIcon
+              className="size-5"
+              strokeWidth={1.5}
+            />
             {copy.expandedCta}
           </button>
 
@@ -177,38 +215,69 @@ export function ExpandedWidget({ type = "texting", settings }) {
   )
 }
 
+const PREVIEW_TABS = [
+  ["chat", "Website Chat"],
+  ["texting", "Website Texting"],
+]
+
 /**
- * Static preview canvas showing the website widget in both its collapsed
- * (greeting) and expanded states, plus a floating launcher button. `type`
- * switches between the SMS lead-capture (texting) and AI chat (chat)
- * presentations; `settings` applies the user's primary color, avatar, and
- * welcome message.
+ * Preview canvas showing the website widget in both its collapsed (greeting)
+ * and expanded states, plus a floating launcher button. A Chat / Texting
+ * toggle lets you preview either widget type; it defaults to `type` (the active
+ * widget) and follows it when the active widget changes. `settings` applies the
+ * user's primary color, avatar, and welcome message.
  */
 export default function WidgetPreview({ type = "texting", settings }) {
+  const [previewType, setPreviewType] = useState(type)
+  // Follow the active widget when it changes; manual toggles persist until then.
+  useEffect(() => setPreviewType(type), [type])
+
   return (
-    <div className="relative min-h-[554px] w-full overflow-hidden rounded-[12px] border border-gray-200 bg-gradient-to-b from-slate-50 to-slate-200 p-6">
-      <p className="text-xs font-semibold uppercase tracking-[0.72px] text-black">
-        Preview
-      </p>
-
-      {/* Collapsed mock — lower left */}
-      <div className="absolute bottom-10 left-[90px]">
-        <GreetingWidget type={type} settings={settings} />
+    <div className="relative min-h-[480px] w-full overflow-hidden rounded-[12px] border border-gray-200 bg-gradient-to-b from-slate-50 to-slate-200 p-6 flex flex-col justify-between gap-6">
+      <div className="flex items-start justify-between gap-3">
+        <span className="text-sm font-medium uppercase tracking-wide text-black">
+          Preview
+        </span>
+        <div className="inline-flex items-center rounded-full bg-white p-1 shadow-[0_1px_3px_rgba(16,24,40,0.12)]">
+          {PREVIEW_TABS.map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setPreviewType(value)}
+              className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                previewType === value
+                  ? "bg-black text-white"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Expanded mock — upper right */}
-      <div className="absolute right-[25px] bottom-[90px]">
-        <ExpandedWidget type={type} settings={settings} />
-      </div>
+      <div className="flex flex-col md:flex-row w-auto justify-around items-end gap-28 mx-auto">
+        {/* Collapsed mock — lower left */}
+        <div className="">
+          <GreetingWidget type={previewType} settings={settings} />
+        </div>
 
-      {/* Floating launcher */}
-      <button
-        type="button"
-        className="absolute bottom-6 right-6 flex size-12 items-center justify-center rounded-full bg-black text-white"
-        aria-label="Close widget"
-      >
-        <XMarkIcon className="size-6" />
-      </button>
+        <div className="flex flex-col items-end gap-4">
+          {/* Expanded mock — upper right */}
+          <div className="">
+            <ExpandedWidget type={previewType} settings={settings} />
+          </div>
+
+          {/* Floating launcher */}
+          <button
+            type="button"
+            className="flex size-12 items-center justify-center rounded-full bg-black text-white"
+            aria-label="Close widget"
+          >
+            <XMarkIcon className="size-6" />
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
