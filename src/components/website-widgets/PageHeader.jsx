@@ -42,7 +42,10 @@ export default function PageHeader({ ready = false, changeKey = 0 }) {
   const handlePublish = () => {
     if (publishState !== "idle") return
     setPublishState("loading")
-    timerRef.current = setTimeout(() => setPublishState("done"), PUBLISH_DELAY_MS)
+    timerRef.current = setTimeout(
+      () => setPublishState("done"),
+      PUBLISH_DELAY_MS,
+    )
   }
 
   const renderButton = () => {
@@ -68,7 +71,10 @@ export default function PageHeader({ ready = false, changeKey = 0 }) {
           style={{ backgroundImage: PURPLE_GRADIENT }}
         >
           Publishing…
-          <ArrowPathIcon className="size-6 shrink-0 animate-spin" strokeWidth={1.5} />
+          <ArrowPathIcon
+            className="size-6 shrink-0 animate-spin"
+            strokeWidth={1.5}
+          />
         </button>
       )
     }
@@ -82,7 +88,10 @@ export default function PageHeader({ ready = false, changeKey = 0 }) {
           style={{ backgroundImage: GREEN_GRADIENT }}
         >
           Published
-          <CheckCircleIcon className="size-6 shrink-0 text-emerald-100" strokeWidth={1.5} />
+          <CheckCircleIcon
+            className="size-6 shrink-0 text-emerald-100"
+            strokeWidth={1.5}
+          />
         </button>
       )
     }
@@ -102,20 +111,22 @@ export default function PageHeader({ ready = false, changeKey = 0 }) {
   }
 
   return (
-    <header className="flex items-center justify-between rounded-[10px] border border-gray-200 bg-white p-6 shadow-[0px_10px_20px_-12px_rgba(0,0,0,0.02),0px_58px_50px_-20px_rgba(0,0,0,0.03)]">
-      <div>
-        <div className="flex items-center gap-2.5">
-          <h1 className="text-2xl font-semibold tracking-tight text-black">
-            Website Widgets
-          </h1>
-          <Badge label="Beta" variant="betaBlue" />
+    <div className="sticky top-0 z-10 bg-gray-200 mt-[-10px] pt-[10px] rounded-b-[10px]">
+      <header className="flex items-center justify-between rounded-[10px] border border-gray-200 bg-white p-6 shadow-[0px_10px_20px_-12px_rgba(0,0,0,0.02),0px_58px_50px_-20px_rgba(0,0,0,0.03)]">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-2xl font-semibold tracking-tight text-black">
+              Website Widgets
+            </h1>
+            <Badge label="Beta" variant="betaBlue" />
+          </div>
+          <p className="mt-0.5 text-sm text-gray-600">
+            Add a widget to your website so visitors can reach you instantly.
+          </p>
         </div>
-        <p className="mt-0.5 text-sm text-gray-600">
-          Add a widget to your website so visitors can reach you instantly.
-        </p>
-      </div>
 
-      {renderButton()}
-    </header>
+        {renderButton()}
+      </header>
+    </div>
   )
 }
