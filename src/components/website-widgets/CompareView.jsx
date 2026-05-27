@@ -4,9 +4,9 @@ import {
   CheckIcon,
   XMarkIcon,
   ChatBubbleOvalLeftEllipsisIcon,
-  ChatBubbleLeftRightIcon,
 } from "@heroicons/react/24/outline"
 import InfoBanner from "./InfoBanner"
+import SmsIcon from "./SmsIcon"
 
 const CHAT_FEATURES = [
   { label: "Instant answers, 24/7", yes: true },
@@ -71,7 +71,7 @@ export default function CompareView({ onBack, onUpgrade, provisioned }) {
         className="flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-black"
       >
         <ArrowLeftIcon className="size-4" strokeWidth={2} />
-        Back to Website Chat
+        Back to Website Widgets
       </button>
 
       <h2 className="mt-4 text-2xl font-semibold tracking-tight text-black">
@@ -131,10 +131,7 @@ export default function CompareView({ onBack, onUpgrade, provisioned }) {
           </span>
           <div className="flex items-center gap-3">
             <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-purple-200">
-              <ChatBubbleLeftRightIcon
-                className="size-6 text-purple-700"
-                strokeWidth={1.5}
-              />
+              <SmsIcon className="size-6 text-purple-700" />
             </span>
             <div>
               <h3 className="text-lg font-semibold text-black">

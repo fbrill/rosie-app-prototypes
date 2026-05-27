@@ -7,9 +7,9 @@ import SettingsNav from "./SettingsNav"
 import PageHeader from "./PageHeader"
 import SectionCard from "./SectionCard"
 import WidgetPreview from "./WidgetPreview"
-import ConfirmSwitchModal from "./ConfirmSwitchModal"
-import ChatWidgetCard from "./ChatWidgetCard"
-import TextingWidgetCard from "./TextingWidgetCard"
+import BillingSwitchModal from "./BillingSwitchModal"
+import WidgetSelector from "./WidgetSelector"
+import HowItWorksBanner from "./HowItWorksBanner"
 import CompareView from "./CompareView"
 import InstallationCard from "./InstallationCard"
 import InfoBanner from "./InfoBanner"
@@ -18,18 +18,23 @@ import { useWidgetJourney } from "./useWidgetJourney"
 import { useWidgetCustomization } from "./useWidgetCustomization"
 import { SwatchIcon, PencilSquareIcon } from "@heroicons/react/24/outline"
 
+// End of the current billing period (prototype constant — kept stable to avoid
+// SSR/client date drift).
+const BILLING_PERIOD_END = "June 26, 2026"
+
 /**
- * Agent Settings → Website Widgets. Full app shell wrapping a single
- * click-through journey: Website Chat (default, included) → compare → enable the
- * $50/mo Website Texting add-on → provision the SMS number → live texting, and
- * back. The live widget preview sits in its own container below, except during
- * the compare takeover.
+ * Agent Settings → Website Widgets. The top section is two stacked containers —
+ * Website Chat (free, default) and Website Texting ($50/mo add-on) — that show
+ * which widget is live, the lead-journey progress, and the upgrade / switch-back
+ * flow. Below sit the unchanged Customization and Installation containers. A
+ * DialKit panel jumps to any state for review.
  */
 export default function WebsiteWidgets() {
   const journey = useWidgetJourney()
   const customization = useWidgetCustomization()
-  const [confirmSwitchToChat, setConfirmSwitchToChat] = useState(false)
+  const [billingOpen, setBillingOpen] = useState(false)
   const [customizeOpen, setCustomizeOpen] = useState(false)
+  const [introVisible, setIntroVisible] = useState(true)
 
   const { stage } = journey
   const isCompare = stage === "compare"
@@ -39,27 +44,30 @@ export default function WebsiteWidgets() {
       return (
         <CompareView
           onBack={journey.closeCompare}
-          onUpgrade={journey.upgrade}
+          onUpgrade={journey.subscribeTexting}
           provisioned={journey.addonProvisioned}
         />
       )
     }
-    if (stage === "chat") {
-      return (
-        <ChatWidgetCard
-          provisioned={journey.addonProvisioned}
-          onCompare={journey.openCompare}
-          onSwitchToTexting={journey.switchToTexting}
-        />
-      )
-    }
+    // One Widget container (radio group of the two types) under a dismissible
+    // how-it-works + upsell banner.
     return (
-      <TextingWidgetCard
-        stage={stage}
-        numberStatus={journey.numberStatus}
-        onActivateNumber={journey.activateNumber}
-        onSwitchToChat={() => setConfirmSwitchToChat(true)}
-      />
+      <>
+        {introVisible && (
+          <HowItWorksBanner
+            onDismiss={() => setIntroVisible(false)}
+            onUpsell={journey.openCompare}
+          />
+        )}
+        <WidgetSelector
+          stage={stage}
+          liveWidget={journey.liveWidget}
+          periodEndLabel={BILLING_PERIOD_END}
+          onUpsell={journey.openCompare}
+          onSwitchToChat={() => setBillingOpen(true)}
+          onKeepTexting={journey.keepTexting}
+        />
+      </>
     )
   }
 
@@ -129,14 +137,17 @@ export default function WebsiteWidgets() {
         </main>
       </div>
 
-      <ConfirmSwitchModal
-        open={confirmSwitchToChat}
-        from="texting"
-        to="chat"
-        onClose={() => setConfirmSwitchToChat(false)}
-        onConfirm={() => {
-          journey.switchToChat()
-          setConfirmSwitchToChat(false)
+      <BillingSwitchModal
+        open={billingOpen}
+        periodEndLabel={BILLING_PERIOD_END}
+        onClose={() => setBillingOpen(false)}
+        onSwitchNow={() => {
+          journey.switchToChatNow()
+          setBillingOpen(false)
+        }}
+        onSchedule={() => {
+          journey.scheduleSwitchToChat()
+          setBillingOpen(false)
         }}
       />
 

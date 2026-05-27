@@ -34,6 +34,22 @@ export function ActiveBadge() {
 }
 
 /**
+ * "Live on your site" pill with a pulsing green dot — marks whichever widget
+ * container is currently the live one.
+ */
+export function LiveBadge({ label = "Live on your site" }) {
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full bg-purple-100 py-[5px] pl-2.5 pr-3 text-xs font-medium text-purple-700">
+      <span className="relative flex size-2">
+        <span className="absolute inline-flex size-full animate-ping rounded-full bg-purple-500 opacity-60" />
+        <span className="relative inline-flex size-2 rounded-full bg-purple-500" />
+      </span>
+      {label}
+    </span>
+  )
+}
+
+/**
  * Amber circular badge marking premium-gated items in the settings sub-nav.
  */
 export function PremiumBadge() {

@@ -1,27 +1,29 @@
 import { useEffect, useRef, useState } from "react"
+import { useDialKit } from "dialkit"
 
-// Simulated SMS-number provisioning delay (In Progress → Active).
+// Simulated SMS-number provisioning delay (subscribe → live texting).
 const PROVISIONING_DELAY_MS = 2500
 
 /**
- * Stage machine for the Website Widgets activation journey. One widget runs at a
- * time; the user clicks from the default (Website Chat) through comparing,
- * enabling the $50/mo add-on (straight from the compare table), and provisioning
- * the SMS number, then can switch back to chat. Activating texting or switching
- * channels marks an unpublished change (drives the header Publish button).
+ * State machine for the Website Widgets top section. Website Chat is the free,
+ * always-available default; Website Texting is a $50/mo add-on. One widget is
+ * live on the site at a time, surfaced as two stacked containers.
  *
- *   chat → compare → texting-inactive
- *        activateNumber(): inactive → inprogress → (timer) → active
- *   texting-active ⇄ chat   (each switch → pending publish)
+ *   chat ──(compare → subscribe)──▶ provisioning ──(auto, ~2.5s)──▶ texting
+ *   texting ──(switch back)──▶ chat (now)  |  texting-scheduled (end of period)
+ *
+ * Subscribing auto-provisions the number — no extra click. While provisioning,
+ * Chat stays live. Switching texting → chat is billing-aware (now vs scheduled).
+ * Switching widgets takes effect immediately, so it does NOT arm Publish — only
+ * appearance/customization edits do (via markPending). DialKit jumps statically
+ * to any state for review.
  */
 export function useWidgetJourney() {
   const [stage, setStage] = useState("chat")
-  // Once the add-on has been enabled + number activated, later chat⇄texting
-  // switches are instant (no re-setup), matching "switching is instant".
+  // Once texting has been subscribed + provisioned, re-enabling is instant.
   const [addonProvisioned, setAddonProvisioned] = useState(false)
-  // Whether the live widget has an unpublished change (drives the header
-  // Publish button). The nonce bumps on every change so the button re-arms
-  // even when one pending change immediately follows another.
+  // Unpublished change → drives the header Publish button. The nonce bumps on
+  // every change so the button re-arms even for back-to-back changes.
   const [pendingPublish, setPendingPublish] = useState(false)
   const [publishNonce, setPublishNonce] = useState(0)
   const timersRef = useRef([])
@@ -31,71 +33,141 @@ export function useWidgetJourney() {
     timersRef.current = []
   }
 
-  // Flag an unpublished change to the live widget (activating texting or
-  // switching channels) and re-arm the Publish button.
+  // Arms the header Publish button. Only appearance/customization changes call
+  // this — switching the live widget takes effect immediately, no publish.
   const markPending = () => {
     setPendingPublish(true)
     setPublishNonce((n) => n + 1)
   }
 
-  // --- Click-path transitions -------------------------------------------------
-  const openCompare = () => setStage("compare")
-  const closeCompare = () => setStage("chat")
-  // Enabling the add-on happens straight from the compare table — no
-  // interstitial band — landing on the SMS-number activation screen.
-  const upgrade = () => setStage("texting-inactive")
-
-  const activateNumber = () => {
+  // Kick off the simulated provisioning → live-texting transition.
+  const startProvisioning = () => {
     clearTimers()
-    setStage("texting-inprogress")
+    setStage("provisioning")
     timersRef.current.push(
       setTimeout(() => {
         setAddonProvisioned(true)
-        setStage("texting-active")
-        markPending() // texting is now live → publish
+        setStage("texting")
       }, PROVISIONING_DELAY_MS),
     )
   }
 
-  const switchToChat = () => {
+  // --- Click-path transitions -------------------------------------------------
+  const openCompare = () => setStage("compare")
+  const closeCompare = () => setStage("chat")
+
+  // Subscribing happens straight from the compare table: auto-provision, no
+  // activate click. If already provisioned once, go live instantly.
+  const subscribeTexting = () => {
     clearTimers()
-    setStage("chat")
-    markPending() // reverting to chat is also a change → publish
+    if (addonProvisioned) {
+      setStage("texting")
+    } else {
+      startProvisioning()
+    }
   }
 
-  // After provisioning, jump straight to live texting (no compare/add-on steps).
-  const switchToTexting = () => {
+  // Switch the live widget back to Chat immediately (forfeits the paid period).
+  const switchToChatNow = () => {
     clearTimers()
-    setStage("texting-active")
-    markPending()
+    setStage("chat")
   }
+
+  // Keep texting live but schedule the switch to Chat for the period end.
+  const scheduleSwitchToChat = () => {
+    clearTimers()
+    setStage("texting-scheduled")
+  }
+
+  // Cancel a scheduled switch — texting stays live.
+  const keepTexting = () => {
+    clearTimers()
+    setStage("texting")
+  }
+
+  // --- DialKit static jumps ---------------------------------------------------
+  const dk = useDialKit(
+    "Website Widgets",
+    {
+      goChat: { type: "action", label: "↦ Chat live (default)" },
+      goCompare: { type: "action", label: "↦ Compare view" },
+      goProvisioning: { type: "action", label: "↦ Texting: provisioning" },
+      goTextingLive: { type: "action", label: "↦ Texting: live" },
+      goScheduledSwitch: { type: "action", label: "↦ Texting: ending (scheduled)" },
+      reset: { type: "action", label: "↺ Reset journey" },
+    },
+    {
+      onAction: (action) => {
+        clearTimers()
+        switch (action) {
+          case "goChat":
+            setStage("chat")
+            setPendingPublish(false)
+            break
+          case "goCompare":
+            setStage("compare")
+            setPendingPublish(false)
+            break
+          case "goProvisioning":
+            // Static jump — no auto-advance timer, so the state can be inspected.
+            setStage("provisioning")
+            setPendingPublish(false)
+            break
+          case "goTextingLive":
+            setAddonProvisioned(true)
+            setStage("texting")
+            setPendingPublish(false)
+            break
+          case "goScheduledSwitch":
+            setAddonProvisioned(true)
+            setStage("texting-scheduled")
+            setPendingPublish(false)
+            break
+          case "reset":
+            setAddonProvisioned(false)
+            setStage("chat")
+            setPendingPublish(false)
+            break
+          default:
+            break
+        }
+      },
+    },
+  )
+  void dk
 
   useEffect(() => () => clearTimers(), [])
 
+  // Which widget is actually live on the site right now. Texting only goes live
+  // once provisioning completes, so the site stays on Chat until then.
+  const liveWidget =
+    stage === "texting" || stage === "texting-scheduled" ? "texting" : "chat"
+
   const numberStatus =
-    stage === "texting-active"
+    stage === "texting" || stage === "texting-scheduled"
       ? "active"
-      : stage === "texting-inprogress"
+      : stage === "provisioning"
         ? "inProgress"
         : "inactive"
 
-  const previewType =
-    stage === "chat" || stage === "compare" ? "chat" : "texting"
+  // The customization preview mirrors the live widget.
+  const previewType = liveWidget
 
   return {
     stage,
+    liveWidget,
     numberStatus,
     previewType,
     addonProvisioned,
     pendingPublish,
     publishNonce,
-    // click handlers
+    // transitions
     openCompare,
     closeCompare,
-    upgrade,
-    activateNumber,
-    switchToChat,
-    switchToTexting,
+    subscribeTexting,
+    switchToChatNow,
+    scheduleSwitchToChat,
+    keepTexting,
     markPending,
   }
 }
