@@ -7,6 +7,7 @@ import {
   CalendarDaysIcon,
   ClockIcon,
   CheckCircleIcon,
+  InformationCircleIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline"
 import SectionCard from "./SectionCard"
@@ -63,17 +64,21 @@ const outlineBtn =
  * @param {string} stage
  * @param {"chat"|"texting"} liveWidget
  * @param {string} periodEndLabel
- * @param {() => void} onUpsell       - open the compare view
- * @param {() => void} onSwitchToChat - open the billing switch-back modal
- * @param {() => void} onKeepTexting  - cancel a scheduled switch
+ * @param {boolean} chatSwitchNotice         - show the post-switch-now info banner
+ * @param {() => void} onUpsell              - open the compare view
+ * @param {() => void} onSwitchToChat        - open the billing switch-back modal
+ * @param {() => void} onKeepTexting         - cancel a scheduled switch
+ * @param {() => void} onDismissChatSwitchNotice - dismiss the post-switch-now banner
  */
 export default function WidgetSelector({
   stage,
   liveWidget,
   periodEndLabel,
+  chatSwitchNotice,
   onUpsell,
   onSwitchToChat,
   onKeepTexting,
+  onDismissChatSwitchNotice,
 }) {
   const chatLive = liveWidget === "chat"
   const textingLive = liveWidget === "texting"
@@ -143,6 +148,32 @@ export default function WidgetSelector({
           />
         </div>
 
+        {stage === "chat" && chatSwitchNotice && (
+          <div className="flex items-start gap-3 rounded-[10px] border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+            <InformationCircleIcon
+              className="mt-0.5 size-5 shrink-0 text-blue-700"
+              strokeWidth={1.5}
+            />
+            <div className="flex-1 leading-snug">
+              <p className="font-semibold">
+                You&apos;ve switched back to Website Chat
+              </p>
+              <p className="mt-1 text-blue-800">
+                Your Website Texting add-on is set to expire on{" "}
+                {periodEndLabel} — you won&apos;t be charged again.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onDismissChatSwitchNotice}
+              className="-m-1 shrink-0 rounded-full p-1 text-blue-700 opacity-70 transition-opacity hover:opacity-100"
+              aria-label="Dismiss"
+            >
+              <XMarkIcon className="size-4" strokeWidth={2} />
+            </button>
+          </div>
+        )}
+
         {stage === "texting" && !successDismissed && (
           <div className="flex items-start gap-3 rounded-[10px] border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
             <CheckCircleIcon
@@ -150,7 +181,9 @@ export default function WidgetSelector({
               strokeWidth={1.5}
             />
             <div className="flex-1 leading-snug">
-              <p className="font-semibold">You&apos;ve switched to Website Texting</p>
+              <p className="font-semibold">
+                You&apos;ve switched to Website Texting
+              </p>
               <p className="mt-1 text-emerald-800">
                 Nothing else to do — your existing embed code keeps working.
                 You&apos;ll start seeing more leads show up in your
@@ -172,7 +205,26 @@ export default function WidgetSelector({
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[10px] border border-blue-200 bg-blue-50 p-4">
             <div className="bg-white border border-black/10 rounded-full pl-3 pr-5 py-1.5 flex items-center gap-2.5">
               <span className="text-base font-bold text-black flex items-center gap-2.5">
-                <ClockIcon className="size-4 shrink-0 text-blue-700" />
+                <svg
+                  class="mr-1 -ml-1 size-5 animate-spin text-blue-500"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
                 (954) 333-3343
               </span>
             </div>

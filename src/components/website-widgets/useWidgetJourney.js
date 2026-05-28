@@ -22,6 +22,9 @@ export function useWidgetJourney() {
   const [stage, setStage] = useState("chat")
   // Once texting has been subscribed + provisioned, re-enabling is instant.
   const [addonProvisioned, setAddonProvisioned] = useState(false)
+  // True after a billing-aware "Switch now" back to Chat — drives the info
+  // banner that tells the user their Texting add-on will expire at period end.
+  const [chatSwitchNotice, setChatSwitchNotice] = useState(false)
   // Unpublished change → drives the header Publish button. The nonce bumps on
   // every change so the button re-arms even for back-to-back changes.
   const [pendingPublish, setPendingPublish] = useState(false)
@@ -53,13 +56,17 @@ export function useWidgetJourney() {
   }
 
   // --- Click-path transitions -------------------------------------------------
-  const openCompare = () => setStage("compare")
+  const openCompare = () => {
+    setChatSwitchNotice(false)
+    setStage("compare")
+  }
   const closeCompare = () => setStage("chat")
 
   // Subscribing happens straight from the compare table: auto-provision, no
   // activate click. If already provisioned once, go live instantly.
   const subscribeTexting = () => {
     clearTimers()
+    setChatSwitchNotice(false)
     if (addonProvisioned) {
       setStage("texting")
     } else {
@@ -68,10 +75,14 @@ export function useWidgetJourney() {
   }
 
   // Switch the live widget back to Chat immediately (forfeits the paid period).
+  // Surfaces a one-time info banner about the add-on expiring at period end.
   const switchToChatNow = () => {
     clearTimers()
     setStage("chat")
+    setChatSwitchNotice(true)
   }
+
+  const dismissChatSwitchNotice = () => setChatSwitchNotice(false)
 
   // Keep texting live but schedule the switch to Chat for the period end.
   const scheduleSwitchToChat = () => {
@@ -99,6 +110,7 @@ export function useWidgetJourney() {
     {
       onAction: (action) => {
         clearTimers()
+        setChatSwitchNotice(false)
         switch (action) {
           case "goChat":
             setStage("chat")
@@ -159,6 +171,7 @@ export function useWidgetJourney() {
     numberStatus,
     previewType,
     addonProvisioned,
+    chatSwitchNotice,
     pendingPublish,
     publishNonce,
     // transitions
@@ -168,6 +181,7 @@ export function useWidgetJourney() {
     switchToChatNow,
     scheduleSwitchToChat,
     keepTexting,
+    dismissChatSwitchNotice,
     markPending,
   }
 }
