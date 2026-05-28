@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import GlobalSidebar from "./GlobalSidebar"
 import SettingsNav from "./SettingsNav"
@@ -35,6 +35,12 @@ export default function WebsiteWidgets() {
   const [billingOpen, setBillingOpen] = useState(false)
   const [customizeOpen, setCustomizeOpen] = useState(false)
   const [introVisible, setIntroVisible] = useState(true)
+
+  // Which widget type the preview (and, in turn, the Edit modal) is showing.
+  // Defaults to the live widget and follows it, but the Chat/Texting toggle can
+  // override it — so opening Edit configures exactly what's on screen.
+  const [previewType, setPreviewType] = useState(journey.previewType)
+  useEffect(() => setPreviewType(journey.previewType), [journey.previewType])
 
   const { stage } = journey
   const isCompare = stage === "compare"
@@ -109,6 +115,8 @@ export default function WebsiteWidgets() {
                     <div className="p-6">
                       <WidgetPreview
                         type={journey.previewType}
+                        previewType={previewType}
+                        onPreviewTypeChange={setPreviewType}
                         settings={customization.settings}
                       />
                     </div>
@@ -153,7 +161,7 @@ export default function WebsiteWidgets() {
 
       <CustomizationModal
         open={customizeOpen}
-        type={journey.previewType}
+        type={previewType}
         settings={customization.settings}
         onCancel={() => setCustomizeOpen(false)}
         onSave={(next) => {

@@ -11,6 +11,8 @@ import {
   GreetingWidget,
   ExpandedWidget,
   WELCOME_DEFAULTS,
+  FIRST_MESSAGE_DEFAULT,
+  INPUT_PLACEHOLDER_DEFAULT,
 } from "./WidgetPreview"
 
 const TYPE_LABEL = { chat: "Website Chat", texting: "Website Texting" }
@@ -250,6 +252,39 @@ export default function CustomizationModal({
                     </span>
                   </div>
                 </div>
+
+                {type === "chat" && (
+                  <>
+                    <div className="flex flex-col gap-2">
+                      <p className="text-sm font-semibold text-black">
+                        First Message
+                      </p>
+                      <textarea
+                        rows={3}
+                        maxLength={MAX_MESSAGE}
+                        value={draft.firstMessage ?? ""}
+                        onChange={(e) => set({ firstMessage: e.target.value })}
+                        placeholder={FIRST_MESSAGE_DEFAULT}
+                        className="w-full resize-none rounded-[10px] border border-gray-300 p-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <p className="text-sm font-semibold text-black">
+                        Input Placeholder
+                      </p>
+                      <input
+                        type="text"
+                        value={draft.inputPlaceholder ?? ""}
+                        onChange={(e) =>
+                          set({ inputPlaceholder: e.target.value })
+                        }
+                        placeholder={INPUT_PLACEHOLDER_DEFAULT}
+                        className="w-full rounded-[10px] border border-gray-300 p-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                      />
+                    </div>
+                  </>
+                )}
 
                 <Row label="Widget Position">
                   <Select

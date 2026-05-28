@@ -6,7 +6,12 @@ const STORAGE_KEY = "ww:customization"
 export const DEFAULT_SETTINGS = {
   primaryColor: "#2DD4BF",
   avatarUrl: "/images/avatar-placeholder.png",
-  welcomeMessage: "", // empty → falls back to the per-type default greeting
+  // Mini greeting widget copy (both types). Empty → per-type default greeting.
+  welcomeMessage: "",
+  // Chat conversation's opening bubble. Empty → per-type default first message.
+  firstMessage: "",
+  // Chat composer placeholder. Empty → default ("Type Something…").
+  inputPlaceholder: "",
   position: "bottom-right",
   openMode: "immediately",
 }

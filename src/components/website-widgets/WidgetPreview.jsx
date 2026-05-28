@@ -4,6 +4,7 @@ import {
   UserCircleIcon,
   DevicePhoneMobileIcon,
   ChatBubbleOvalLeftEllipsisIcon,
+  PaperAirplaneIcon,
 } from "@heroicons/react/24/outline"
 
 const DEFAULT_AVATAR = "/images/avatar-placeholder.png"
@@ -23,6 +24,7 @@ const COPY = {
   chat: {
     greeting:
       "Welcome to North Shore Painting. Ask us anything — we reply instantly.",
+    firstMessage: "Hi 👋 How can I help you today?",
     collapsedCta: "Chat Now",
     launcher: "Chat With Us",
     expandedBody: "Ask us anything and we'll answer right away.",
@@ -35,6 +37,12 @@ export const WELCOME_DEFAULTS = {
   texting: COPY.texting.greeting,
   chat: COPY.chat.greeting,
 }
+
+/** Default conversation-opener for the chat widget (chat-only). */
+export const FIRST_MESSAGE_DEFAULT = COPY.chat.firstMessage
+
+/** Default chat-input placeholder, surfaced as the modal field's placeholder. */
+export const INPUT_PLACEHOLDER_DEFAULT = "Type Something..."
 
 /**
  * Pick a readable text color (black or white) for content sitting on top of
@@ -62,24 +70,30 @@ export function getAccessibleColor(hex) {
 function resolveSettings(settings, type) {
   const s = settings ?? {}
   const message = (s.welcomeMessage ?? "").trim()
+  const first = (s.firstMessage ?? "").trim()
+  const placeholder = (s.inputPlaceholder ?? "").trim()
   const primaryColor = s.primaryColor || DEFAULT_PRIMARY
   return {
     primaryColor,
     onPrimaryColor: getAccessibleColor(primaryColor),
     avatarUrl: s.avatarUrl || DEFAULT_AVATAR,
     greeting: message || COPY[type]?.greeting || COPY.texting.greeting,
+    firstMessage: first || FIRST_MESSAGE_DEFAULT,
+    inputPlaceholder: placeholder || INPUT_PLACEHOLDER_DEFAULT,
   }
 }
 
-/** Round avatar with a green online indicator. */
-function Avatar({ size = 32, src = DEFAULT_AVATAR }) {
+/** Round avatar with an optional green online indicator. */
+function Avatar({ size = 32, src = DEFAULT_AVATAR, indicator = true }) {
   return (
     <span
       className="relative inline-block shrink-0 rounded-full border border-black/10"
       style={{ width: size, height: size }}
     >
       <img src={src} alt="" className="size-full rounded-full object-cover" />
-      <span className="absolute -bottom-px -right-px size-2.5 rounded-[4px] border-[1.5px] border-white bg-[#17b26a]" />
+      {indicator && (
+        <span className="absolute -bottom-px -right-px size-2.5 rounded-[4px] border-[1.5px] border-white bg-[#17b26a]" />
+      )}
     </span>
   )
 }
@@ -142,11 +156,78 @@ export function GreetingWidget({ type = "texting", settings }) {
 }
 
 /**
- * Expanded state. Texting captures name + phone before continuing over SMS;
- * Chat drops the lead-capture form and SMS-consent copy entirely. The header
- * and CTA are tinted with the widget's primary color.
+ * Expanded "chat" state: a full conversation interface. The customizable first
+ * message lands as an incoming bubble, and the composer shows the customizable
+ * input placeholder. Header, send button and accents are tinted with the
+ * primary color. (This is the "big" widget — texting uses the lead-capture
+ * form below.) The welcome message is *not* shown here — it belongs to the
+ * mini greeting widget only.
+ */
+function ChatWidget({ settings }) {
+  const {
+    primaryColor,
+    onPrimaryColor,
+    avatarUrl,
+    firstMessage,
+    inputPlaceholder,
+  } = resolveSettings(settings, "chat")
+  return (
+    <div className="w-[330px] overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50 shadow-[0px_20px_40px_-12px_rgba(0,0,0,0.2)]">
+      <div className="rounded-t-xl border border-neutral-200 bg-white">
+        {/* Tinted header */}
+        <div
+          className="flex items-center gap-4 rounded-t-xl p-3"
+          style={{ backgroundColor: primaryColor, color: onPrimaryColor }}
+        >
+          <Avatar size={40} src={avatarUrl} />
+          <p className="flex-1 text-sm font-bold">{BUSINESS_NAME}</p>
+          <XMarkIcon className="size-4" />
+        </div>
+
+        {/* Conversation */}
+        <div className="flex min-h-[220px] flex-col gap-3 px-3 py-4">
+          <p className="text-center text-[10px] leading-4 text-neutral-400">
+            Friday, March 23
+          </p>
+          <div className="flex items-end gap-3">
+            <Avatar size={32} src={avatarUrl} indicator={false} />
+            <p className="flex-1 rounded-xl rounded-bl-none bg-neutral-200/60 p-3 text-sm leading-5 text-black/90">
+              {firstMessage}
+            </p>
+          </div>
+        </div>
+
+        {/* Composer */}
+        <div className="flex items-center gap-2.5 border-t border-neutral-200 py-2 pl-4 pr-2">
+          <span className="min-w-0 flex-1 truncate text-sm text-neutral-400">
+            {inputPlaceholder}
+          </span>
+          <button
+            type="button"
+            className="flex size-10 shrink-0 items-center justify-center rounded-lg"
+            style={{ backgroundColor: primaryColor, color: onPrimaryColor }}
+            aria-label="Send"
+          >
+            <PaperAirplaneIcon className="size-5" strokeWidth={1.5} />
+          </button>
+        </div>
+      </div>
+
+      <p className="py-2.5 text-center text-[10px] text-neutral-400">
+        Powered by <span className="underline">Rosie</span>.
+      </p>
+    </div>
+  )
+}
+
+/**
+ * Expanded state. Chat shows the full conversation interface (ChatWidget);
+ * texting captures name + phone before continuing over SMS, with SMS-consent
+ * copy. The header and CTA are tinted with the widget's primary color.
  */
 export function ExpandedWidget({ type = "texting", settings }) {
+  if (type === "chat") return <ChatWidget settings={settings} />
+
   const copy = COPY[type] ?? COPY.texting
   const { primaryColor, onPrimaryColor, avatarUrl } = resolveSettings(
     settings,
@@ -222,15 +303,29 @@ const PREVIEW_TABS = [
 
 /**
  * Preview canvas showing the website widget in both its collapsed (greeting)
- * and expanded states, plus a floating launcher button. A Chat / Texting
- * toggle lets you preview either widget type; it defaults to `type` (the active
- * widget) and follows it when the active widget changes. `settings` applies the
- * user's primary color, avatar, and welcome message.
+ * and expanded states, plus a floating launcher button. A Chat / Texting toggle
+ * lets you preview either widget type. `settings` applies the user's primary
+ * color, avatar, welcome message, and input placeholder.
+ *
+ * The toggle can be controlled by passing `previewType` + `onPreviewTypeChange`
+ * (lets a parent share the choice with the Edit modal). Uncontrolled otherwise:
+ * it defaults to `type` (the active widget) and follows it when that changes.
  */
-export default function WidgetPreview({ type = "texting", settings }) {
-  const [previewType, setPreviewType] = useState(type)
-  // Follow the active widget when it changes; manual toggles persist until then.
-  useEffect(() => setPreviewType(type), [type])
+export default function WidgetPreview({
+  type = "texting",
+  previewType: controlledType,
+  onPreviewTypeChange,
+  settings,
+}) {
+  const [internalType, setInternalType] = useState(type)
+  // Uncontrolled: follow the active widget when it changes (controlled parents
+  // own this sync themselves).
+  useEffect(() => {
+    if (controlledType == null) setInternalType(type)
+  }, [type, controlledType])
+
+  const previewType = controlledType ?? internalType
+  const setPreviewType = onPreviewTypeChange ?? setInternalType
 
   return (
     <div className="relative min-h-[480px] w-full overflow-hidden rounded-[12px] border border-gray-200 bg-gradient-to-b from-slate-50 to-slate-200 p-6 flex flex-col justify-between gap-6">
