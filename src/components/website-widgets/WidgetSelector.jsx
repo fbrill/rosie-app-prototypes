@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react"
 import {
   WindowIcon,
   ChatBubbleOvalLeftEllipsisIcon,
@@ -5,6 +6,8 @@ import {
   ArrowUturnLeftIcon,
   CalendarDaysIcon,
   ClockIcon,
+  CheckCircleIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline"
 import SectionCard from "./SectionCard"
 import InfoBanner from "./InfoBanner"
@@ -28,23 +31,17 @@ function IconCircle({ icon: Icon, active }) {
   )
 }
 
-/** One widget option row in the radio group. */
+/** One widget option row — top/bottom rows share a single bordered container. */
 function OptionRow({ icon, title, desc, active, right }) {
   return (
     <div
-      className={`flex flex-wrap items-center gap-4 rounded-[12px] border p-4 transition-colors ${
-        active ? "border-purple-300 bg-purple-25" : "border-gray-200 bg-white"
+      className={`flex flex-wrap items-center gap-4 p-4 transition-colors ${
+        active ? "bg-purple-25" : "bg-white"
       }`}
     >
       <IconCircle icon={icon} active={active} />
       <div className="min-w-[180px] flex-1">
-        <p
-          className={`text-base font-semibold ${
-            active ? "text-black" : "text-gray-700"
-          }`}
-        >
-          {title}
-        </p>
+        <p className="text-base font-semibold text-black">{title}</p>
         <p className="text-sm text-gray-600">{desc}</p>
       </div>
       <div className="ml-auto shrink-0">{right}</div>
@@ -83,6 +80,11 @@ export default function WidgetSelector({
   const isProvisioning = stage === "provisioning"
   const isScheduled = stage === "texting-scheduled"
 
+  // Success banner shown when Texting goes live; re-shows on each stage change
+  // (e.g. after provisioning completes) and can be dismissed.
+  const [successDismissed, setSuccessDismissed] = useState(false)
+  useEffect(() => setSuccessDismissed(false), [stage])
+
   const chatRight = chatLive ? (
     <LiveBadge label="Active" />
   ) : isScheduled ? (
@@ -101,7 +103,7 @@ export default function WidgetSelector({
   )
 
   const textingRight = textingLive ? (
-    <LiveBadge label="Live" />
+    <LiveBadge label="Active" />
   ) : isProvisioning ? (
     <NumberStatusBadge status="inProgress" />
   ) : (
@@ -116,28 +118,55 @@ export default function WidgetSelector({
   )
 
   return (
-    <SectionCard icon={WindowIcon} title="Widget">
+    <SectionCard icon={WindowIcon} title="Widget Type">
       <InfoBanner>
         You can run one widget at a time. Switching is instant and keeps your
         existing install snippet — only the live experience changes.
       </InfoBanner>
 
       <div className="flex flex-col gap-3 p-6">
-        <OptionRow
-          icon={ChatBubbleOvalLeftEllipsisIcon}
-          title="Website Chat"
-          desc="Instant, anonymous answers to common questions — free and great for quick support, but it can't capture who the visitor was."
-          active={chatLive}
-          right={chatRight}
-        />
+        <div className="divide-y divide-gray-200 overflow-hidden rounded-[12px] border border-gray-200">
+          <OptionRow
+            icon={ChatBubbleOvalLeftEllipsisIcon}
+            title="Website Chat"
+            desc="Instant, anonymous answers to common questions — free and great for quick support, but it can't capture who the visitor was."
+            active={chatLive}
+            right={chatRight}
+          />
 
-        <OptionRow
-          icon={SmsIcon}
-          title="Website Texting"
-          desc="Captures name & phone, then continues over SMS — so you can follow up and turn visitors into leads, even after they leave. $50/mo."
-          active={textingLive}
-          right={textingRight}
-        />
+          <OptionRow
+            icon={SmsIcon}
+            title="Website Texting"
+            desc="Captures name & phone, then continues over SMS — so you can follow up and turn visitors into leads, even after they leave. $50/mo."
+            active={textingLive}
+            right={textingRight}
+          />
+        </div>
+
+        {stage === "texting" && !successDismissed && (
+          <div className="flex items-start gap-3 rounded-[10px] border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+            <CheckCircleIcon
+              className="mt-0.5 size-5 shrink-0 text-emerald-600"
+              strokeWidth={1.5}
+            />
+            <div className="flex-1 leading-snug">
+              <p className="font-semibold">You&apos;ve switched to Website Texting</p>
+              <p className="mt-1 text-emerald-800">
+                Nothing else to do — your existing embed code keeps working.
+                You&apos;ll start seeing more leads show up in your
+                Conversations inbox.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSuccessDismissed(true)}
+              className="-m-1 shrink-0 rounded-full p-1 text-emerald-700 opacity-70 transition-opacity hover:opacity-100"
+              aria-label="Dismiss"
+            >
+              <XMarkIcon className="size-4" strokeWidth={2} />
+            </button>
+          </div>
+        )}
 
         {isProvisioning && (
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[10px] border border-blue-200 bg-blue-50 p-4">
