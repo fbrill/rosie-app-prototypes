@@ -3,7 +3,7 @@ import { CheckCircleIcon } from "@heroicons/react/24/outline"
 const VARIANTS = {
   betaBlue: "bg-blue-100 text-blue-700",
   betaPurple: "bg-purple-100 text-purple-600 border border-purple-300",
-  premium: "bg-purple-200 text-purple-600",
+  premium: "bg-purple-300 text-purple-700",
   included: "bg-emerald-100 text-emerald-700",
   inactive: "bg-amber-100 text-amber-700",
 }

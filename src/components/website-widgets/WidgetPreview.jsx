@@ -354,7 +354,7 @@ export default function WidgetPreview({
               onClick={() => setPreviewType(value)}
               className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
                 previewType === value
-                  ? "bg-black text-white"
+                  ? "bg-purple-200 text-purple-900"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
