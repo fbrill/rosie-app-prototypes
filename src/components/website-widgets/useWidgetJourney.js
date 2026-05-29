@@ -96,12 +96,20 @@ export function useWidgetJourney() {
     setStage("texting")
   }
 
-  // --- DialKit static jumps ---------------------------------------------------
+  // --- DialKit: version toggle + static state jumps ---------------------------
   const dk = useDialKit(
     "Website Widgets",
     {
+      version: {
+        type: "select",
+        options: [
+          { value: "a", label: "A · Compare takeover (current)" },
+          { value: "b", label: "B · Inline comparison" },
+        ],
+        default: "a",
+      },
       goChat: { type: "action", label: "↦ Chat live (default)" },
-      goCompare: { type: "action", label: "↦ Compare view" },
+      goCompare: { type: "action", label: "↦ Compare view (A only)" },
       goProvisioning: { type: "action", label: "↦ Texting: provisioning" },
       goTextingLive: { type: "action", label: "↦ Texting: live" },
       goScheduledSwitch: { type: "action", label: "↦ Texting: ending (scheduled)" },
@@ -146,7 +154,10 @@ export function useWidgetJourney() {
       },
     },
   )
-  void dk
+
+  // Which design variant to render (DialKit-controlled). "a" = current compare
+  // takeover; "b" = inline side-by-side comparison.
+  const version = dk.version === "b" ? "b" : "a"
 
   useEffect(() => () => clearTimers(), [])
 
@@ -166,6 +177,7 @@ export function useWidgetJourney() {
   const previewType = liveWidget
 
   return {
+    version,
     stage,
     liveWidget,
     numberStatus,

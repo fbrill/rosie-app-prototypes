@@ -11,6 +11,7 @@ import BillingSwitchModal from "./BillingSwitchModal"
 import WidgetSelector from "./WidgetSelector"
 import HowItWorksBanner from "./HowItWorksBanner"
 import CompareView from "./CompareView"
+import WidgetCompareInline from "./WidgetCompareInline"
 import InstallationCard from "./InstallationCard"
 import InfoBanner from "./InfoBanner"
 import CustomizationModal from "./CustomizationModal"
@@ -43,9 +44,28 @@ export default function WebsiteWidgets() {
   useEffect(() => setPreviewType(journey.previewType), [journey.previewType])
 
   const { stage } = journey
-  const isCompare = stage === "compare"
+  const version = journey.version === "b" ? "b" : "a"
+  // The full-screen compare takeover only ever exists in version A.
+  const isCompare = version === "a" && stage === "compare"
 
   const renderMain = () => {
+    // Version B: one inline, side-by-side comparison — no how-it-works banner,
+    // no separate takeover.
+    if (version === "b") {
+      return (
+        <WidgetCompareInline
+          stage={stage}
+          liveWidget={journey.liveWidget}
+          periodEndLabel={BILLING_PERIOD_END}
+          chatSwitchNotice={journey.chatSwitchNotice}
+          onChangeToTexting={journey.subscribeTexting}
+          onChangeToChat={() => setBillingOpen(true)}
+          onKeepTexting={journey.keepTexting}
+          onDismissChatSwitchNotice={journey.dismissChatSwitchNotice}
+        />
+      )
+    }
+
     if (isCompare) {
       return (
         <CompareView
@@ -95,7 +115,7 @@ export default function WebsiteWidgets() {
 
           <AnimatePresence mode="wait">
             <motion.div
-              key={isCompare ? "compare" : "widget"}
+              key={`${version}-${isCompare ? "compare" : "widget"}`}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
@@ -120,6 +140,7 @@ export default function WebsiteWidgets() {
                         previewType={previewType}
                         onPreviewTypeChange={setPreviewType}
                         settings={customization.settings}
+                        activeType={journey.liveWidget}
                       />
                     </div>
 

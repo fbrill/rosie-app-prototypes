@@ -6,6 +6,7 @@ import {
   ChatBubbleOvalLeftEllipsisIcon,
   PaperAirplaneIcon,
 } from "@heroicons/react/24/outline"
+import { Badge } from "./Badge"
 
 const DEFAULT_AVATAR = "/images/avatar-placeholder.png"
 const DEFAULT_PRIMARY = "#2DD4BF"
@@ -316,6 +317,7 @@ export default function WidgetPreview({
   previewType: controlledType,
   onPreviewTypeChange,
   settings,
+  activeType,
 }) {
   const [internalType, setInternalType] = useState(type)
   // Uncontrolled: follow the active widget when it changes (controlled parents
@@ -339,13 +341,16 @@ export default function WidgetPreview({
               key={value}
               type="button"
               onClick={() => setPreviewType(value)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+              className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
                 previewType === value
                   ? "bg-black text-white"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
               {label}
+              {activeType === value && (
+                <Badge label="Active" variant="premium" />
+              )}
             </button>
           ))}
         </div>
