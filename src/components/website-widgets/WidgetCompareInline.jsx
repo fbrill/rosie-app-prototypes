@@ -8,6 +8,7 @@ import SectionCard from "./SectionCard"
 import InfoBanner from "./InfoBanner"
 import SmsIcon from "./SmsIcon"
 import { LiveBadge } from "./Badge"
+import { FeatureList } from "./widgetCompareData"
 import {
   ChatSwitchNotice,
   TextingLiveNotice,
@@ -16,15 +17,15 @@ import {
   Spinner,
 } from "./WidgetJourneyNotices"
 
-// Condensed summaries (B-only): Chat shows its three core strengths; Texting
-// shows only the value it adds on top of Chat — kept inline so the cards read
-// as a quick comparison rather than a pricing/feature checklist.
-const CHAT_BULLETS = [
+// Feature summaries (B-only): Chat lists its three core strengths; Texting lists
+// only the value it adds on top of Chat (under an "Everything in Website Chat,
+// plus" line). All render as checkmarks.
+const CHAT_FEATURES = [
   "Instant answers, 24/7",
   "No contact info required",
   "Trained on your business info",
 ]
-const TEXTING_BULLETS = [
+const TEXTING_FEATURES = [
   "Captures name + phone",
   "Continues over SMS after they leave",
   "Notifies you of new leads",
@@ -36,24 +37,10 @@ const changeBtn =
 const activeBtn =
   "cursor-default rounded-full bg-black/10 py-3 text-center text-sm font-semibold text-black/60 w-full px-10"
 
-/** Inline "a • b • c" summary line — replaces the icon checklist in version B. */
-function BulletSummary({ items }) {
-  return (
-    <p className="text-sm leading-relaxed text-gray-700">
-      {items.map((item, i) => (
-        <span key={item}>
-          {i > 0 && <span className="px-1.5 text-gray-300">•</span>}
-          {item}
-        </span>
-      ))}
-    </p>
-  )
-}
-
 /**
- * One option card: icon + title + subtitle, neutral price, a condensed inline
- * summary, and a footer slot. The active widget gets a purple selected treatment
- * and an "Active" badge; the other stays neutral.
+ * One option card: icon + title + subtitle, neutral price, a vertical checkmark
+ * feature list (with an optional intro line), and a footer slot. The active
+ * widget gets a purple selected treatment and an "Active" badge.
  */
 function WidgetCard({
   icon: Icon,
@@ -61,7 +48,8 @@ function WidgetCard({
   subtitle,
   price,
   priceNote,
-  bullets,
+  features,
+  featuresIntro,
   active,
   footer,
 }) {
@@ -101,7 +89,12 @@ function WidgetCard({
       </div>
 
       <div className="mt-4">
-        <BulletSummary items={bullets} />
+        {featuresIntro && (
+          <p className="mb-2.5 text-sm font-medium text-gray-600">
+            {featuresIntro}
+          </p>
+        )}
+        <FeatureList features={features.map((label) => ({ label, yes: true }))} />
       </div>
 
       <div className="mt-auto pt-6">{footer}</div>
@@ -192,7 +185,7 @@ export default function WidgetCompareInline({
             subtitle="Anonymous Q&A on your site"
             price="Free"
             priceNote="included with every plan"
-            bullets={CHAT_BULLETS}
+            features={CHAT_FEATURES}
             active={chatActive}
             footer={chatFooter}
           />
@@ -208,7 +201,8 @@ export default function WidgetCompareInline({
               </>
             }
             priceNote="25 conversations included per month · $1 per additional"
-            bullets={TEXTING_BULLETS}
+            features={TEXTING_FEATURES}
+            featuresIntro="Everything in Website Chat, plus:"
             active={textingActive}
             footer={textingFooter}
           />
