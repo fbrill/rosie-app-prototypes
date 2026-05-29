@@ -1,65 +1,88 @@
 /**
- * Centralized, swappable persistence for editable UI copy.
+ * Centralized persistence for editable UI copy — backed by Firestore.
  *
- * An "adapter" is the single seam between the edit-mode UI and wherever the
- * copy overrides actually live. Phase 1 stores them in localStorage; Phase 2
- * can drop in a Firebase adapter implementing the same three methods, and no
- * component (nor the provider) has to change.
+ * An "adapter" is the single seam between the edit-mode UI and the store. Each
+ * edited string is one document in a collection (doc id = the EditableText id),
+ * so saving a string creates/updates exactly that entry, and all clients see the
+ * latest copy live.
  *
  * Adapter interface:
- *   load(): Record<string, string>     - snapshot of overrides for hydration
- *   persist(overrides): void           - write the whole map
- *   subscribe(listener): () => void    - notify on external changes; returns an
- *                                        unsubscribe fn. (no-op for localStorage)
+ *   subscribe(onChange): () => void
+ *       Live source of truth. Calls onChange(fullMap) with the complete
+ *       { id: value } map on first load and on every remote change. Returns an
+ *       unsubscribe fn.
+ *   set(id, value): Promise<void>      Create/update one entry.
+ *   remove(id): Promise<void>          Delete one entry.
  */
 
-export const STORAGE_KEY = "ww:content-overrides"
+import {
+  collection,
+  doc,
+  setDoc,
+  deleteDoc,
+  onSnapshot,
+  serverTimestamp,
+} from "firebase/firestore"
 
 /**
- * localStorage-backed adapter. Survives full page reloads / browser restarts on
- * the same machine. Mirrors the try/catch storage handling in
- * useWidgetCustomization.js — storage can be unavailable (SSR, privacy mode).
+ * Firestore adapter — one document per edit id inside `collectionName`.
+ *
+ * The document id IS the EditableText id, e.g. "compare.chat.title". Dots are
+ * valid in Firestore document ids (only "/", a bare "." or "..", and the
+ * "__*__" reserved pattern are disallowed — none of our ids hit those), and
+ * dots in a *document id* are unrelated to the dotted-*field-path* gotcha, so no
+ * encoding is needed.
+ *
+ * Each doc: { value: string, updatedAt: <server timestamp> }.
  */
-export function createLocalStorageAdapter(key = STORAGE_KEY) {
+export function createFirestoreAdapter(db, collectionName = "copyOverrides") {
+  const col = collection(db, collectionName)
+
   return {
-    load() {
-      try {
-        const raw = localStorage.getItem(key)
-        return raw ? JSON.parse(raw) : {}
-      } catch {
-        return {}
-      }
+    subscribe(onChange) {
+      return onSnapshot(
+        col,
+        (snap) => {
+          const map = {}
+          snap.forEach((d) => {
+            const value = d.data()?.value
+            if (typeof value === "string") map[d.id] = value
+          })
+          onChange(map)
+        },
+        (err) => {
+          console.warn("[edit-mode] Firestore subscribe error:", err)
+        },
+      )
     },
-    persist(overrides) {
-      try {
-        localStorage.setItem(key, JSON.stringify(overrides))
-      } catch {
-        // Storage unavailable — overrides still live in React state this session.
-      }
+    set(id, value) {
+      return setDoc(
+        doc(col, id),
+        { value, updatedAt: serverTimestamp() },
+        { merge: true },
+      )
     },
-    // No external change source for localStorage in this tab. A future Firebase
-    // adapter returns its onSnapshot unsubscribe here.
-    subscribe() {
-      return () => {}
+    remove(id) {
+      return deleteDoc(doc(col, id))
     },
   }
 }
 
 /**
- * Phase 2 sketch — implement the same three methods against Firestore:
- *
- *   export function createFirebaseAdapter(db, docPath) {
- *     let cache = {}
- *     return {
- *       load: () => cache,
- *       persist: (overrides) => setDoc(doc(db, docPath), overrides, { merge: true }),
- *       subscribe: (listener) =>
- *         onSnapshot(doc(db, docPath), (snap) => {
- *           cache = snap.data() ?? {}
- *           listener(cache)
- *         }),
- *     }
- *   }
- *
- * Swap it in at <EditModeProvider adapter={createFirebaseAdapter(db, path)} />.
+ * No-op fallback used when Firestore is unavailable (env not configured yet, SSR,
+ * or init failed). Edits live only in React state for the session — nothing is
+ * persisted or shared — so the UI still "works" while credentials are pending.
  */
+export function createMemoryAdapter() {
+  return {
+    subscribe() {
+      return () => {}
+    },
+    set() {
+      return Promise.resolve()
+    },
+    remove() {
+      return Promise.resolve()
+    },
+  }
+}
