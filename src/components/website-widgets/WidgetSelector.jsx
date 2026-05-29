@@ -10,6 +10,7 @@ import InfoBanner from "./InfoBanner"
 import SmsIcon from "./SmsIcon"
 import { LiveBadge } from "./Badge"
 import NumberStatusBadge from "./NumberStatusBadge"
+import EditableText from "../edit-mode/EditableText"
 import {
   ChatSwitchNotice,
   TextingLiveNotice,
@@ -104,7 +105,7 @@ export default function WidgetSelector({
       className={`${outlineBtn} border-gray-300 bg-white text-gray-900 hover:bg-gray-50`}
     >
       <ArrowUturnLeftIcon className="size-4" strokeWidth={2} />
-      Switch to Chat
+      <EditableText id="selector.switchToChatBtn">Switch to Chat</EditableText>
     </button>
   )
 
@@ -118,32 +119,60 @@ export default function WidgetSelector({
       onClick={onUpsell}
       className={`${outlineBtn} border-purple-300 bg-white text-purple-700 hover:bg-purple-50`}
     >
-      Compare
+      <EditableText id="selector.compareBtn">Compare</EditableText>
       <ArrowRightIcon className="size-4" strokeWidth={2} />
     </button>
   )
 
   return (
-    <SectionCard icon={WindowIcon} title="Widget Type">
+    <SectionCard
+      icon={WindowIcon}
+      title={
+        <EditableText id="selector.sectionTitle" as="span">
+          Widget Type
+        </EditableText>
+      }
+    >
       <InfoBanner>
-        You can run one widget at a time. Switching is instant and keeps your
-        existing install snippet — only the live experience changes.
+        <EditableText id="selector.info" multiline>
+          You can run one widget at a time. Switching is instant and keeps your
+          existing install snippet — only the live experience changes.
+        </EditableText>
       </InfoBanner>
 
       <div className="flex flex-col gap-3 p-6">
         <div className="divide-y divide-gray-200 overflow-hidden rounded-[12px] border border-gray-200">
           <OptionRow
             icon={ChatBubbleOvalLeftEllipsisIcon}
-            title="Website Chat"
-            desc="Instant, anonymous answers to common questions — free and great for quick support, but it can't capture who the visitor was."
+            title={
+              <EditableText id="selector.chat.title" as="span">
+                Website Chat
+              </EditableText>
+            }
+            desc={
+              <EditableText id="selector.chat.desc" as="span" multiline>
+                Instant, anonymous answers to common questions — free and great
+                for quick support, but it can't capture who the visitor was.
+              </EditableText>
+            }
             active={chatLive}
             right={chatRight}
           />
 
           <OptionRow
             icon={SmsIcon}
-            title="Website Texting"
-            desc="Captures name & phone, then continues over SMS — so you can follow up and turn visitors into leads, even after they leave. $50/mo."
+            title={
+              <EditableText id="selector.texting.title" as="span">
+                Website Texting
+              </EditableText>
+            }
+            desc={
+              <EditableText id="selector.texting.desc" as="span" multiline>
+                Captures name & phone, then continues over SMS — so you can
+                follow up and turn visitors into leads, even after they leave.
+                $50/mo.
+              </EditableText>
+            }
             active={textingLive}
             right={textingRight}
           />

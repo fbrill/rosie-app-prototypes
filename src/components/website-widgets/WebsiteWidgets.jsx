@@ -17,6 +17,9 @@ import InfoBanner from "./InfoBanner"
 import CustomizationModal from "./CustomizationModal"
 import { useWidgetJourney } from "./useWidgetJourney"
 import { useWidgetCustomization } from "./useWidgetCustomization"
+import { EditModeProvider } from "../edit-mode/EditModeContext"
+import EditableText from "../edit-mode/EditableText"
+import EditModeToggle from "../edit-mode/EditModeToggle"
 import { SwatchIcon, PencilSquareIcon } from "@heroicons/react/24/outline"
 
 // End of the current billing period (prototype constant — kept stable to avoid
@@ -100,6 +103,7 @@ export default function WebsiteWidgets() {
   }
 
   return (
+    <EditModeProvider>
     <div className="min-h-screen bg-gray-200 p-2.5">
       <div className="flex items-start gap-2.5">
         <GlobalSidebar />
@@ -128,11 +132,17 @@ export default function WebsiteWidgets() {
                 <>
                   <SectionCard
                     icon={SwatchIcon}
-                    title="Website Widget Customization"
+                    title={
+                      <EditableText id="customization.sectionTitle" as="span">
+                        Website Widget Customization
+                      </EditableText>
+                    }
                   >
                     <InfoBanner>
-                      Customize the look of the widget that will display on your
-                      website.
+                      <EditableText id="customization.info" multiline>
+                        Customize the look of the widget that will display on your
+                        website.
+                      </EditableText>
                     </InfoBanner>
                     <div className="p-6">
                       <WidgetPreview
@@ -155,7 +165,7 @@ export default function WebsiteWidgets() {
                           className="size-[18px]"
                           strokeWidth={2}
                         />
-                        Edit
+                        <EditableText id="customization.editBtn">Edit</EditableText>
                       </button>
                     </div>
                   </SectionCard>
@@ -193,6 +203,9 @@ export default function WebsiteWidgets() {
           setCustomizeOpen(false)
         }}
       />
+
+      <EditModeToggle />
     </div>
+    </EditModeProvider>
   )
 }

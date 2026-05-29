@@ -7,6 +7,7 @@ import {
 } from "@heroicons/react/24/outline"
 import { Badge } from "./Badge"
 import SmsIcon from "./SmsIcon"
+import EditableText from "../edit-mode/EditableText"
 
 const STEPS = [
   {
@@ -63,8 +64,20 @@ function StepCard({ step }) {
           strokeWidth={1.5}
         />
       </div>
-      <p className="text-sm font-semibold text-black">{step.title}</p>
-      <p className="text-[13px] leading-[1.4] text-gray-700">{step.body}</p>
+      <p className="text-sm font-semibold text-black">
+        <EditableText id={`howItWorks.steps.${step.n}.title`} as="span">
+          {step.title}
+        </EditableText>
+      </p>
+      <p className="text-[13px] leading-[1.4] text-gray-700">
+        <EditableText
+          id={`howItWorks.steps.${step.n}.body`}
+          as="span"
+          multiline
+        >
+          {step.body}
+        </EditableText>
+      </p>
     </div>
   )
 }
@@ -82,13 +95,22 @@ export default function HowItWorksBanner({ onDismiss, onUpsell }) {
     <section className="rounded-[12px] border border-gray-200 bg-gray-50 p-6">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-black">
+          <EditableText
+            id="howItWorks.title"
+            as="h2"
+            className="text-lg font-semibold text-black"
+          >
             How your website widget works
-          </h2>
-          <p className="mt-0.5 text-sm text-gray-600">
+          </EditableText>
+          <EditableText
+            id="howItWorks.subtitle"
+            as="p"
+            multiline
+            className="mt-0.5 text-sm text-gray-600"
+          >
             Website Chat covers the first three steps. Website Texting adds the
             fourth — capturing the lead.
-          </p>
+          </EditableText>
         </div>
         <button
           type="button"
@@ -108,8 +130,14 @@ export default function HowItWorksBanner({ onDismiss, onUpsell }) {
 
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 pt-4">
         <p className="text-sm text-gray-700">
-          Want to turn visitors into leads you can follow up with? Add{" "}
-          <span className="font-semibold text-purple-700">Website Texting</span>
+          <EditableText id="howItWorks.footerLead" as="span" multiline>
+            Want to turn visitors into leads you can follow up with? Add
+          </EditableText>{" "}
+          <span className="font-semibold text-purple-700">
+            <EditableText id="howItWorks.footerHighlight" as="span">
+              Website Texting
+            </EditableText>
+          </span>
           .
         </p>
         <button
@@ -117,7 +145,7 @@ export default function HowItWorksBanner({ onDismiss, onUpsell }) {
           onClick={onUpsell}
           className="flex shrink-0 items-center gap-1.5 rounded-full border border-purple-300 bg-white px-5 py-2.5 text-sm font-semibold text-purple-700 transition-colors hover:bg-purple-50"
         >
-          Compare Widgets
+          <EditableText id="howItWorks.compareBtn">Compare Widgets</EditableText>
           <ArrowRightIcon className="size-4" strokeWidth={2} />
         </button>
       </div>

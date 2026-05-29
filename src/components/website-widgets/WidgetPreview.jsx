@@ -7,6 +7,7 @@ import {
   PaperAirplaneIcon,
 } from "@heroicons/react/24/outline"
 import { Badge } from "./Badge"
+import EditableText from "../edit-mode/EditableText"
 
 const DEFAULT_AVATAR = "/images/avatar-placeholder.png"
 const DEFAULT_PRIMARY = "#2DD4BF"
@@ -140,7 +141,9 @@ export function GreetingWidget({ type = "texting", settings }) {
             className="size-5"
             strokeWidth={1.5}
           />
-          {copy.collapsedCta}
+          <EditableText id={`preview.${type}.collapsedCta`}>
+            {copy.collapsedCta}
+          </EditableText>
         </button>
       </div>
 
@@ -150,7 +153,9 @@ export function GreetingWidget({ type = "texting", settings }) {
         style={{ backgroundColor: primaryColor, color: onPrimaryColor }}
       >
         <ChatBubbleOvalLeftEllipsisIcon className="size-5" strokeWidth={1.5} />
-        {copy.launcher}
+        <EditableText id={`preview.${type}.launcher`}>
+          {copy.launcher}
+        </EditableText>
       </button>
     </div>
   )
@@ -252,7 +257,11 @@ export function ExpandedWidget({ type = "texting", settings }) {
         <div className="flex flex-col gap-4 px-4 py-5">
           <div className="text-sm font-semibold leading-5 text-neutral-700">
             <p>Hello 👋</p>
-            <p>{copy.expandedBody}</p>
+            <p>
+              <EditableText id={`preview.${type}.expandedBody`} as="span" multiline>
+                {copy.expandedBody}
+              </EditableText>
+            </p>
           </div>
 
           {isTexting && (
@@ -274,7 +283,9 @@ export function ExpandedWidget({ type = "texting", settings }) {
               className="size-5"
               strokeWidth={1.5}
             />
-            {copy.expandedCta}
+            <EditableText id={`preview.${type}.expandedCta`}>
+              {copy.expandedCta}
+            </EditableText>
           </button>
 
           {isTexting && (

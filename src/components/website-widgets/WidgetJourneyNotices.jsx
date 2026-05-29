@@ -4,6 +4,7 @@ import {
   InformationCircleIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline"
+import EditableText from "../edit-mode/EditableText"
 
 /**
  * Interim-state notices for the widget journey, shared between the version-A
@@ -22,10 +23,19 @@ export function ChatSwitchNotice({ periodEndLabel, onDismiss }) {
         strokeWidth={1.5}
       />
       <div className="flex-1 leading-snug">
-        <p className="font-semibold">You&apos;ve switched back to Website Chat</p>
+        <p className="font-semibold">
+          <EditableText id="notice.chatSwitch.title" as="span">
+            You&apos;ve switched back to Website Chat
+          </EditableText>
+        </p>
         <p className="mt-1 text-blue-800">
-          Your Website Texting add-on is set to expire on {periodEndLabel} — you
-          won&apos;t be charged again.
+          <EditableText id="notice.chatSwitch.bodyLead" as="span" multiline>
+            Your Website Texting add-on is set to expire on
+          </EditableText>{" "}
+          {periodEndLabel}{" "}
+          <EditableText id="notice.chatSwitch.bodyTail" as="span" multiline>
+            — you won&apos;t be charged again.
+          </EditableText>
         </p>
       </div>
       <button
@@ -49,10 +59,17 @@ export function TextingLiveNotice({ onDismiss }) {
         strokeWidth={1.5}
       />
       <div className="flex-1 leading-snug">
-        <p className="font-semibold">You&apos;ve switched to Website Texting</p>
+        <p className="font-semibold">
+          <EditableText id="notice.textingLive.title" as="span">
+            You&apos;ve switched to Website Texting
+          </EditableText>
+        </p>
         <p className="mt-1 text-emerald-800">
-          Nothing else to do — your existing embed code keeps working. You&apos;ll
-          start seeing more leads show up in your Conversations inbox.
+          <EditableText id="notice.textingLive.body" as="span" multiline>
+            Nothing else to do — your existing embed code keeps working.
+            You&apos;ll start seeing more leads show up in your Conversations
+            inbox.
+          </EditableText>
         </p>
       </div>
       <button
@@ -105,11 +122,16 @@ export function ProvisioningNotice() {
       </div>
       <div className="flex flex-col">
         <p className="font-medium text-sm text-black">
-          We&apos;re provisioning your number for SMS - this takes a few minutes.
+          <EditableText id="notice.provisioning.title" as="span" multiline>
+            We&apos;re provisioning your number for SMS - this takes a few
+            minutes.
+          </EditableText>
         </p>
         <p className="text-sm text-gray-700">
-          Your site keeps showing Website Chat until it&apos;s ready, then switches
-          over automatically.
+          <EditableText id="notice.provisioning.body" as="span" multiline>
+            Your site keeps showing Website Chat until it&apos;s ready, then
+            switches over automatically.
+          </EditableText>
         </p>
       </div>
     </div>
@@ -126,16 +148,23 @@ export function ScheduledSwitchNotice({ periodEndLabel, onKeepTexting }) {
       />
       <p className="min-w-[200px] flex-1 leading-snug">
         <span className="font-semibold">
-          Switching to Website Chat on {periodEndLabel}.
+          <EditableText id="notice.scheduled.lead" as="span">
+            Switching to Website Chat on
+          </EditableText>{" "}
+          {periodEndLabel}.
         </span>{" "}
-        You keep Website Texting until your billing period ends.
+        <EditableText id="notice.scheduled.body" as="span" multiline>
+          You keep Website Texting until your billing period ends.
+        </EditableText>
       </p>
       <button
         type="button"
         onClick={onKeepTexting}
         className="shrink-0 rounded-full bg-black px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-black/90"
       >
-        Keep Website Texting
+        <EditableText id="notice.scheduled.keepBtn">
+          Keep Website Texting
+        </EditableText>
       </button>
     </div>
   )

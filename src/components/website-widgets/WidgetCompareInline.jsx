@@ -9,6 +9,7 @@ import InfoBanner from "./InfoBanner"
 import SmsIcon from "./SmsIcon"
 import { LiveBadge } from "./Badge"
 import { FeatureList } from "./widgetCompareData"
+import EditableText from "../edit-mode/EditableText"
 import {
   ChatSwitchNotice,
   TextingLiveNotice,
@@ -50,6 +51,7 @@ function WidgetCard({
   priceNote,
   features,
   featuresIntro,
+  featuresIdPrefix,
   active,
   footer,
 }) {
@@ -94,7 +96,10 @@ function WidgetCard({
             {featuresIntro}
           </p>
         )}
-        <FeatureList features={features.map((label) => ({ label, yes: true }))} />
+        <FeatureList
+          features={features.map((label) => ({ label, yes: true }))}
+          idPrefix={featuresIdPrefix}
+        />
       </div>
 
       <div className="mt-auto pt-6">{footer}</div>
@@ -139,7 +144,7 @@ export default function WidgetCompareInline({
 
   const chatFooter = chatActive ? (
     <button type="button" disabled className={activeBtn}>
-      Active widget
+      <EditableText id="compare.chat.activeBtn">Active widget</EditableText>
     </button>
   ) : isScheduled ? (
     <div className="flex w-full items-center justify-center gap-1.5 rounded-full bg-gray-100 px-10 py-3 text-center text-sm font-medium text-gray-500">
@@ -148,13 +153,13 @@ export default function WidgetCompareInline({
     </div>
   ) : (
     <button type="button" onClick={onChangeToChat} className={changeBtn}>
-      Change to this one
+      <EditableText id="compare.chat.changeBtn">Change to this one</EditableText>
     </button>
   )
 
   const textingFooter = textingActive ? (
     <button type="button" disabled className={activeBtn}>
-      Active widget
+      <EditableText id="compare.texting.activeBtn">Active widget</EditableText>
     </button>
   ) : isProvisioning ? (
     <div
@@ -162,47 +167,92 @@ export default function WidgetCompareInline({
       className="flex cursor-default items-center justify-center gap-2 rounded-full bg-blue-50 py-3 text-center text-sm font-semibold text-blue-700"
     >
       <Spinner className="size-5 text-blue-500" />
-      Switching over...
+      <EditableText id="compare.texting.switchingBtn">
+        Switching over...
+      </EditableText>
     </div>
   ) : (
     <button type="button" onClick={onChangeToTexting} className={changeBtn}>
-      Change to this one
+      <EditableText id="compare.texting.changeBtn">Change to this one</EditableText>
     </button>
   )
 
   return (
-    <SectionCard icon={WindowIcon} title="Website Widget">
+    <SectionCard
+      icon={WindowIcon}
+      title={
+        <EditableText id="compare.sectionTitle" as="span">
+          Website Widget
+        </EditableText>
+      }
+    >
       <InfoBanner>
-        You can run one widget at a time. Switching is instant and keeps your
-        existing install snippet — only the live experience changes.
+        <EditableText id="compare.info" multiline>
+          You can run one widget at a time. Switching is instant and keeps your
+          existing install snippet — only the live experience changes.
+        </EditableText>
       </InfoBanner>
 
       <div className="flex flex-col gap-5 p-6">
         <div className="grid gap-5 lg:grid-cols-2">
           <WidgetCard
             icon={ChatBubbleOvalLeftEllipsisIcon}
-            title="Website Chat"
-            subtitle="Anonymous Q&A on your site"
-            price="Free"
-            priceNote="included with every plan"
+            title={
+              <EditableText id="compare.chat.title" as="span">
+                Website Chat
+              </EditableText>
+            }
+            subtitle={
+              <EditableText id="compare.chat.subtitle" as="span">
+                Anonymous Q&A on your site
+              </EditableText>
+            }
+            price={
+              <EditableText id="compare.chat.price" as="span">
+                Free
+              </EditableText>
+            }
+            priceNote={
+              <EditableText id="compare.chat.priceNote" as="span">
+                included with every plan
+              </EditableText>
+            }
             features={CHAT_FEATURES}
+            featuresIdPrefix="compare.chatFeatures"
             active={chatActive}
             footer={chatFooter}
           />
 
           <WidgetCard
             icon={SmsIcon}
-            title="Website Texting"
-            subtitle="Lead capture + SMS follow-up"
+            title={
+              <EditableText id="compare.texting.title" as="span">
+                Website Texting
+              </EditableText>
+            }
+            subtitle={
+              <EditableText id="compare.texting.subtitle" as="span">
+                Lead capture + SMS follow-up
+              </EditableText>
+            }
             price={
               <>
                 $50{" "}
                 <span className="text-sm font-medium text-gray-700">/mo</span>
               </>
             }
-            priceNote="25 conversations included per month · $1 per additional"
+            priceNote={
+              <EditableText id="compare.texting.priceNote" as="span">
+                25 conversations included per month · $1 per additional
+              </EditableText>
+            }
             features={TEXTING_FEATURES}
-            featuresIntro="Everything in Website Chat, plus:"
+            featuresIntro={
+              <EditableText id="compare.texting.featuresIntro" as="span">
+                Everything in Website Chat, plus:
+              </EditableText>
+            }
+            featuresIdPrefix="compare.textingFeatures"
             active={textingActive}
             footer={textingFooter}
           />

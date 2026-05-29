@@ -11,6 +11,7 @@ import {
 } from "@heroicons/react/24/outline"
 import SectionCard from "./SectionCard"
 import InfoBanner from "./InfoBanner"
+import EditableText from "../edit-mode/EditableText"
 
 const INSTALL_HELP_URL =
   "https://heyrosie.com/support/en/articles/13414782-website-texting-how-to-install-the-website-widget"
@@ -118,17 +119,28 @@ export default function InstallationCard() {
   }
 
   return (
-    <SectionCard icon={CodeBracketSquareIcon} title="Installation">
+    <SectionCard
+      icon={CodeBracketSquareIcon}
+      title={
+        <EditableText id="install.sectionTitle" as="span">
+          Installation
+        </EditableText>
+      }
+    >
       <InfoBanner>
-        Add this code snippet to your website to display the widget on the
-        domains listed below.{" "}
+        <EditableText id="install.info" as="span" multiline>
+          Add this code snippet to your website to display the widget on the
+          domains listed below.
+        </EditableText>{" "}
         <a
           href={INSTALL_HELP_URL}
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-0.5 font-medium text-gray-900 underline underline-offset-2 hover:text-purple-700"
         >
-          Installation Instructions
+          <EditableText id="install.docsLink" as="span">
+            Installation Instructions
+          </EditableText>
           <ArrowUpRightIcon className="size-3" strokeWidth={2} />
         </a>
       </InfoBanner>
@@ -136,14 +148,34 @@ export default function InstallationCard() {
       <div className="flex flex-col gap-5 p-6">
         <SubCard
           icon={GlobeAltIcon}
-          title="Allowed Domains"
-          sublabel="Enter the URL of the website(s) where this widget should be displayed."
-          action={<CardAction icon={PencilSquareIcon} label="Edit" />}
+          title={
+            <EditableText id="install.domains.title" as="span">
+              Allowed Domains
+            </EditableText>
+          }
+          sublabel={
+            <EditableText id="install.domains.sublabel" as="span" multiline>
+              Enter the URL of the website(s) where this widget should be
+              displayed.
+            </EditableText>
+          }
+          action={
+            <CardAction
+              icon={PencilSquareIcon}
+              label={
+                <EditableText id="install.domains.editBtn" as="span">
+                  Edit
+                </EditableText>
+              }
+            />
+          }
         >
           <div className="flex flex-col gap-1.5 rounded-[12px] border border-gray-200 bg-gray-25 px-4 py-3.5">
-            {ALLOWED_DOMAINS.map((domain) => (
-              <span key={domain} className="text-sm text-gray-900">
-                {domain}
+            {ALLOWED_DOMAINS.map((domain, i) => (
+              <span key={i} className="text-sm text-gray-900">
+                <EditableText id={`install.domains.${i}`} as="span">
+                  {domain}
+                </EditableText>
               </span>
             ))}
           </div>
@@ -151,8 +183,16 @@ export default function InstallationCard() {
 
         <SubCard
           icon={CodeBracketSquareIcon}
-          title="Installation Code"
-          sublabel="Code snippet to add to your website."
+          title={
+            <EditableText id="install.code.title" as="span">
+              Installation Code
+            </EditableText>
+          }
+          sublabel={
+            <EditableText id="install.code.sublabel" as="span">
+              Code snippet to add to your website.
+            </EditableText>
+          }
           action={
             <CardAction
               icon={copied ? CheckIcon : Square2StackIcon}
