@@ -1,7 +1,7 @@
 "use client"
 
-import { PencilSquareIcon } from "@heroicons/react/24/outline"
 import { useEditMode } from "./EditModeContext"
+import EditCopyIcon from "./EditCopyIcon"
 
 /**
  * Floating action button (bottom-right) that flips copy edit mode on/off.
@@ -22,7 +22,7 @@ export default function EditModeToggle() {
           : "bg-black text-white hover:bg-black/90"
       }`}
     >
-      <PencilSquareIcon className="size-6" strokeWidth={2} />
+      <EditCopyIcon className="size-6" />
     </button>
   )
 }

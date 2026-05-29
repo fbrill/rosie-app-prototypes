@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { CheckIcon, PencilIcon } from "@heroicons/react/24/outline"
+import { CheckIcon } from "@heroicons/react/24/outline"
 import { useEditMode } from "./EditModeContext"
+import EditCopyIcon from "./EditCopyIcon"
 
 // Dev-only guard against two EditableText instances sharing an id (they would
 // read/write the same override). Module-level so it spans the whole app.
@@ -154,7 +155,7 @@ export default function EditableText({
         }}
         className="absolute right-0 top-1/2 z-10 flex size-[30px] -translate-y-1/2 cursor-pointer items-center justify-center rounded-[8px] border border-black/10 bg-[#010539] text-[#A3E635] opacity-0 shadow-sm transition-opacity hover:bg-[#010539]/90 group-hover:opacity-100 focus-visible:opacity-100 ring-1 ring-white/30"
       >
-        <PencilIcon className="size-[18px]" strokeWidth={2} />
+        <EditCopyIcon className="size-[18px]" />
       </span>
     </Tag>
   )
