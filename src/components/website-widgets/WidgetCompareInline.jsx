@@ -153,7 +153,9 @@ export default function WidgetCompareInline({
     </div>
   ) : (
     <button type="button" onClick={onChangeToChat} className={changeBtn}>
-      <EditableText id="compare.chat.changeBtn">Change to this one</EditableText>
+      <EditableText id="compare.chat.changeBtn">
+        Switch to Website Texting
+      </EditableText>
     </button>
   )
 
@@ -173,7 +175,9 @@ export default function WidgetCompareInline({
     </div>
   ) : (
     <button type="button" onClick={onChangeToTexting} className={changeBtn}>
-      <EditableText id="compare.texting.changeBtn">Change to this one</EditableText>
+      <EditableText id="compare.texting.changeBtn">
+        Switch to Website Chat
+      </EditableText>
     </button>
   )
 
