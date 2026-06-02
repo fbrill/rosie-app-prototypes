@@ -8,6 +8,7 @@ import PageHeader from "./PageHeader"
 import SectionCard from "./SectionCard"
 import WidgetPreview from "./WidgetPreview"
 import BillingSwitchModal from "./BillingSwitchModal"
+import EnableTextingModal from "./EnableTextingModal"
 import WidgetSelector from "./WidgetSelector"
 import HowItWorksBanner from "./HowItWorksBanner"
 import CompareView from "./CompareView"
@@ -37,6 +38,7 @@ export default function WebsiteWidgets() {
   const journey = useWidgetJourney()
   const customization = useWidgetCustomization()
   const [billingOpen, setBillingOpen] = useState(false)
+  const [enableTextingOpen, setEnableTextingOpen] = useState(false)
   const [customizeOpen, setCustomizeOpen] = useState(false)
   const [introVisible, setIntroVisible] = useState(true)
 
@@ -61,7 +63,7 @@ export default function WebsiteWidgets() {
           liveWidget={journey.liveWidget}
           periodEndLabel={BILLING_PERIOD_END}
           chatSwitchNotice={journey.chatSwitchNotice}
-          onChangeToTexting={journey.subscribeTexting}
+          onChangeToTexting={() => setEnableTextingOpen(true)}
           onChangeToChat={() => setBillingOpen(true)}
           onKeepTexting={journey.keepTexting}
           onDismissChatSwitchNotice={journey.dismissChatSwitchNotice}
@@ -73,7 +75,7 @@ export default function WebsiteWidgets() {
       return (
         <CompareView
           onBack={journey.closeCompare}
-          onUpgrade={journey.subscribeTexting}
+          onUpgrade={() => setEnableTextingOpen(true)}
           provisioned={journey.addonProvisioned}
         />
       )
@@ -189,6 +191,15 @@ export default function WebsiteWidgets() {
         onSchedule={() => {
           journey.scheduleSwitchToChat()
           setBillingOpen(false)
+        }}
+      />
+
+      <EnableTextingModal
+        open={enableTextingOpen}
+        onClose={() => setEnableTextingOpen(false)}
+        onConfirm={() => {
+          journey.subscribeTexting()
+          setEnableTextingOpen(false)
         }}
       />
 
