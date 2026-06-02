@@ -7,6 +7,7 @@ import {
   CheckCircleIcon,
 } from "@heroicons/react/24/outline"
 import { Badge } from "./Badge"
+import EditableText from "../edit-mode/EditableText"
 
 const PUBLISH_DELAY_MS = 1000
 
@@ -121,7 +122,10 @@ export default function PageHeader({ ready = false, changeKey = 0 }) {
             <Badge label="Beta" variant="betaBlue" />
           </div>
           <p className="mt-0.5 text-sm text-gray-600">
-            Add a widget to your website so visitors can reach you instantly.
+            <EditableText id="pageHeader.description" multiline>
+              Add Rosie to your website. Pick the experience that fits how you
+              want visitors to engage.
+            </EditableText>
           </p>
         </div>
 
