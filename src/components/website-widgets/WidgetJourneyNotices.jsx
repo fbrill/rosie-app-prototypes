@@ -7,10 +7,8 @@ import {
 import EditableText from "../edit-mode/EditableText"
 
 /**
- * Interim-state notices for the widget journey, shared between the version-A
- * stacked selector (WidgetSelector) and the version-B inline comparison
- * (WidgetCompareInline). Each is a 1:1 extraction of the banner that used to
- * live inline in WidgetSelector — the consumer owns the stage-gating and any
+ * Interim-state notices for the widget journey, rendered by the inline widget
+ * comparison (WidgetCompareInline). The consumer owns the stage-gating and any
  * dismiss state.
  */
 

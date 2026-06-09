@@ -9,7 +9,7 @@ const PROVISIONING_DELAY_MS = 2500
  * always-available default; Website Texting is a $50/mo add-on. One widget is
  * live on the site at a time, surfaced as two stacked containers.
  *
- *   chat ──(compare → subscribe)──▶ provisioning ──(auto, ~2.5s)──▶ texting
+ *   chat ──(subscribe)──▶ provisioning ──(auto, ~2.5s)──▶ texting
  *   texting ──(switch back)──▶ chat (now)  |  texting-scheduled (end of period)
  *
  * Subscribing auto-provisions the number — no extra click. While provisioning,
@@ -56,14 +56,8 @@ export function useWidgetJourney() {
   }
 
   // --- Click-path transitions -------------------------------------------------
-  const openCompare = () => {
-    setChatSwitchNotice(false)
-    setStage("compare")
-  }
-  const closeCompare = () => setStage("chat")
-
-  // Subscribing happens straight from the compare table: auto-provision, no
-  // activate click. If already provisioned once, go live instantly.
+  // Subscribing auto-provisions the number — no activate click. If already
+  // provisioned once, go live instantly.
   const subscribeTexting = () => {
     clearTimers()
     setChatSwitchNotice(false)
@@ -96,20 +90,11 @@ export function useWidgetJourney() {
     setStage("texting")
   }
 
-  // --- DialKit: version toggle + static state jumps ---------------------------
-  const dk = useDialKit(
+  // --- DialKit: static state jumps --------------------------------------------
+  useDialKit(
     "Website Widgets",
     {
-      version: {
-        type: "select",
-        options: [
-          { value: "a", label: "A · Compare takeover (current)" },
-          { value: "b", label: "B · Inline comparison" },
-        ],
-        default: "a",
-      },
       goChat: { type: "action", label: "↦ Chat live (default)" },
-      goCompare: { type: "action", label: "↦ Compare view (A only)" },
       goProvisioning: { type: "action", label: "↦ Texting: provisioning" },
       goTextingLive: { type: "action", label: "↦ Texting: live" },
       goScheduledSwitch: { type: "action", label: "↦ Texting: ending (scheduled)" },
@@ -122,10 +107,6 @@ export function useWidgetJourney() {
         switch (action) {
           case "goChat":
             setStage("chat")
-            setPendingPublish(false)
-            break
-          case "goCompare":
-            setStage("compare")
             setPendingPublish(false)
             break
           case "goProvisioning":
@@ -155,10 +136,6 @@ export function useWidgetJourney() {
     },
   )
 
-  // Which design variant to render (DialKit-controlled). "a" = current compare
-  // takeover; "b" = inline side-by-side comparison.
-  const version = dk.version === "b" ? "b" : "a"
-
   useEffect(() => () => clearTimers(), [])
 
   // Which widget is actually live on the site right now. Texting only goes live
@@ -177,7 +154,6 @@ export function useWidgetJourney() {
   const previewType = liveWidget
 
   return {
-    version,
     stage,
     liveWidget,
     numberStatus,
@@ -187,8 +163,6 @@ export function useWidgetJourney() {
     pendingPublish,
     publishNonce,
     // transitions
-    openCompare,
-    closeCompare,
     subscribeTexting,
     switchToChatNow,
     scheduleSwitchToChat,

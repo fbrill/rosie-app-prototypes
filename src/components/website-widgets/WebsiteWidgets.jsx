@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { AnimatePresence, motion } from "motion/react"
+import { motion } from "motion/react"
 import GlobalSidebar from "./GlobalSidebar"
 import SettingsNav from "./SettingsNav"
 import PageHeader from "./PageHeader"
@@ -9,9 +9,6 @@ import SectionCard from "./SectionCard"
 import WidgetPreview from "./WidgetPreview"
 import BillingSwitchModal from "./BillingSwitchModal"
 import EnableTextingModal from "./EnableTextingModal"
-import WidgetSelector from "./WidgetSelector"
-import HowItWorksBanner from "./HowItWorksBanner"
-import CompareView from "./CompareView"
 import WidgetCompareInline from "./WidgetCompareInline"
 import InstallationCard from "./InstallationCard"
 import InfoBanner from "./InfoBanner"
@@ -28,11 +25,10 @@ import { SwatchIcon, PencilSquareIcon } from "@heroicons/react/24/outline"
 const BILLING_PERIOD_END = "June 26, 2026"
 
 /**
- * Agent Settings → Website Widgets. The top section is two stacked containers —
- * Website Chat (free, default) and Website Texting ($50/mo add-on) — that show
- * which widget is live, the lead-journey progress, and the upgrade / switch-back
- * flow. Below sit the unchanged Customization and Installation containers. A
- * DialKit panel jumps to any state for review.
+ * Agent Settings → Website Widgets. The top section is one inline, side-by-side
+ * comparison of Website Chat (free, default) and Website Texting ($50/mo add-on)
+ * — it shows which widget is live, the lead-journey progress, and the upgrade /
+ * switch-back flow. Below sit the Customization and Installation containers.
  */
 export default function WebsiteWidgets() {
   const journey = useWidgetJourney()
@@ -40,7 +36,6 @@ export default function WebsiteWidgets() {
   const [billingOpen, setBillingOpen] = useState(false)
   const [enableTextingOpen, setEnableTextingOpen] = useState(false)
   const [customizeOpen, setCustomizeOpen] = useState(false)
-  const [introVisible, setIntroVisible] = useState(true)
 
   // Which widget type the preview (and, in turn, the Edit modal) is showing.
   // Defaults to the live widget and follows it, but the Chat/Texting toggle can
@@ -49,60 +44,6 @@ export default function WebsiteWidgets() {
   useEffect(() => setPreviewType(journey.previewType), [journey.previewType])
 
   const { stage } = journey
-  const version = journey.version === "b" ? "b" : "a"
-  // The full-screen compare takeover only ever exists in version A.
-  const isCompare = version === "a" && stage === "compare"
-
-  const renderMain = () => {
-    // Version B: one inline, side-by-side comparison — no how-it-works banner,
-    // no separate takeover.
-    if (version === "b") {
-      return (
-        <WidgetCompareInline
-          stage={stage}
-          liveWidget={journey.liveWidget}
-          periodEndLabel={BILLING_PERIOD_END}
-          chatSwitchNotice={journey.chatSwitchNotice}
-          onChangeToTexting={() => setEnableTextingOpen(true)}
-          onChangeToChat={() => setBillingOpen(true)}
-          onKeepTexting={journey.keepTexting}
-          onDismissChatSwitchNotice={journey.dismissChatSwitchNotice}
-        />
-      )
-    }
-
-    if (isCompare) {
-      return (
-        <CompareView
-          onBack={journey.closeCompare}
-          onUpgrade={() => setEnableTextingOpen(true)}
-          provisioned={journey.addonProvisioned}
-        />
-      )
-    }
-    // One Widget container (radio group of the two types) under a dismissible
-    // how-it-works + upsell banner.
-    return (
-      <>
-        {introVisible && (
-          <HowItWorksBanner
-            onDismiss={() => setIntroVisible(false)}
-            onUpsell={journey.openCompare}
-          />
-        )}
-        <WidgetSelector
-          stage={stage}
-          liveWidget={journey.liveWidget}
-          periodEndLabel={BILLING_PERIOD_END}
-          chatSwitchNotice={journey.chatSwitchNotice}
-          onUpsell={journey.openCompare}
-          onSwitchToChat={() => setBillingOpen(true)}
-          onKeepTexting={journey.keepTexting}
-          onDismissChatSwitchNotice={journey.dismissChatSwitchNotice}
-        />
-      </>
-    )
-  }
 
   return (
     <EditModeProvider>
@@ -119,64 +60,65 @@ export default function WebsiteWidgets() {
             changeKey={journey.publishNonce}
           />
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`${version}-${isCompare ? "compare" : "widget"}`}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-              className="flex flex-col gap-2.5"
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-col gap-2.5"
+          >
+            <WidgetCompareInline
+              stage={stage}
+              liveWidget={journey.liveWidget}
+              periodEndLabel={BILLING_PERIOD_END}
+              chatSwitchNotice={journey.chatSwitchNotice}
+              onChangeToTexting={() => setEnableTextingOpen(true)}
+              onChangeToChat={() => setBillingOpen(true)}
+              onKeepTexting={journey.keepTexting}
+              onDismissChatSwitchNotice={journey.dismissChatSwitchNotice}
+            />
+
+            <SectionCard
+              icon={SwatchIcon}
+              title={
+                <EditableText id="customization.sectionTitle" as="span">
+                  Website Widget Customization
+                </EditableText>
+              }
             >
-              {renderMain()}
+              <InfoBanner>
+                <EditableText id="customization.info" multiline>
+                  Customize the look of the widget that will display on your
+                  website.
+                </EditableText>
+              </InfoBanner>
+              <div className="p-6">
+                <WidgetPreview
+                  type={journey.previewType}
+                  previewType={previewType}
+                  onPreviewTypeChange={setPreviewType}
+                  settings={customization.settings}
+                  activeType={journey.liveWidget}
+                />
+              </div>
 
-              {!isCompare && (
-                <>
-                  <SectionCard
-                    icon={SwatchIcon}
-                    title={
-                      <EditableText id="customization.sectionTitle" as="span">
-                        Website Widget Customization
-                      </EditableText>
-                    }
-                  >
-                    <InfoBanner>
-                      <EditableText id="customization.info" multiline>
-                        Customize the look of the widget that will display on your
-                        website.
-                      </EditableText>
-                    </InfoBanner>
-                    <div className="p-6">
-                      <WidgetPreview
-                        type={journey.previewType}
-                        previewType={previewType}
-                        onPreviewTypeChange={setPreviewType}
-                        settings={customization.settings}
-                        activeType={journey.liveWidget}
-                      />
-                    </div>
+              {/* Footer: edit appearance */}
+              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 bg-gray-25 px-6 py-4">
+                <button
+                  type="button"
+                  onClick={() => setCustomizeOpen(true)}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-purple-100 px-4 py-2 text-sm font-semibold text-purple-700 transition-colors hover:bg-purple-200"
+                >
+                  <PencilSquareIcon
+                    className="size-[18px]"
+                    strokeWidth={2}
+                  />
+                  <EditableText id="customization.editBtn">Edit</EditableText>
+                </button>
+              </div>
+            </SectionCard>
 
-                    {/* Footer: edit appearance */}
-                    <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-200 bg-gray-25 px-6 py-4">
-                      <button
-                        type="button"
-                        onClick={() => setCustomizeOpen(true)}
-                        className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-purple-100 px-4 py-2 text-sm font-semibold text-purple-700 transition-colors hover:bg-purple-200"
-                      >
-                        <PencilSquareIcon
-                          className="size-[18px]"
-                          strokeWidth={2}
-                        />
-                        <EditableText id="customization.editBtn">Edit</EditableText>
-                      </button>
-                    </div>
-                  </SectionCard>
-
-                  <InstallationCard />
-                </>
-              )}
-            </motion.div>
-          </AnimatePresence>
+            <InstallationCard />
+          </motion.div>
         </main>
       </div>
 
