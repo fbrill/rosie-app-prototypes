@@ -24,6 +24,12 @@ import { SwatchIcon, PencilSquareIcon } from "@heroicons/react/24/outline"
 // SSR/client date drift).
 const BILLING_PERIOD_END = "June 26, 2026"
 
+// When the trial ends and Website Texting billing begins. Whether the account
+// is currently in trial is driven live by DialKit (journey.inTrial), so the
+// enable flow can be reviewed both in and out of trial. Prototype constant —
+// kept stable to avoid SSR/client date drift.
+const TRIAL_END = "June 24, 2026"
+
 /**
  * Agent Settings → Website Widgets. The top section is one inline, side-by-side
  * comparison of Website Chat (free, default) and Website Texting ($50/mo add-on)
@@ -138,6 +144,8 @@ export default function WebsiteWidgets() {
 
       <EnableTextingModal
         open={enableTextingOpen}
+        isTrial={journey.inTrial}
+        trialEndLabel={TRIAL_END}
         onClose={() => setEnableTextingOpen(false)}
         onConfirm={() => {
           journey.subscribeTexting()

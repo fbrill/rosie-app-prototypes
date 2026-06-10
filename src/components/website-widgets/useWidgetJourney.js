@@ -16,7 +16,8 @@ const PROVISIONING_DELAY_MS = 2500
  * Chat stays live. Switching texting → chat is billing-aware (now vs scheduled).
  * Switching widgets takes effect immediately, so it does NOT arm Publish — only
  * appearance/customization edits do (via markPending). DialKit jumps statically
- * to any state for review.
+ * to any state for review and carries an "Account in trial" toggle (`inTrial`)
+ * that flips the enable-texting flow between its free-trial and paid framing.
  */
 export function useWidgetJourney() {
   const [stage, setStage] = useState("chat")
@@ -90,10 +91,13 @@ export function useWidgetJourney() {
     setStage("texting")
   }
 
-  // --- DialKit: static state jumps --------------------------------------------
-  useDialKit(
+  // --- DialKit: trial toggle + static state jumps -----------------------------
+  const dials = useDialKit(
     "Website Widgets",
     {
+      // Account billing context. In trial, the Website Texting add-on is free
+      // until the trial ends; toggle off to preview the standard paid flow.
+      accountInTrial: true,
       goChat: { type: "action", label: "↦ Chat live (default)" },
       goProvisioning: { type: "action", label: "↦ Texting: provisioning" },
       goTextingLive: { type: "action", label: "↦ Texting: live" },
@@ -159,6 +163,7 @@ export function useWidgetJourney() {
     numberStatus,
     previewType,
     addonProvisioned,
+    inTrial: dials.accountInTrial,
     chatSwitchNotice,
     pendingPublish,
     publishNonce,
