@@ -2,7 +2,11 @@
 
 import { useEffect } from "react"
 import { AnimatePresence, motion } from "motion/react"
-import { XMarkIcon, CheckCircleIcon } from "@heroicons/react/24/outline"
+import {
+  XMarkIcon,
+  CheckCircleIcon,
+  GiftIcon,
+} from "@heroicons/react/24/outline"
 import EditableText from "../edit-mode/EditableText"
 
 /**
@@ -12,11 +16,24 @@ import EditableText from "../edit-mode/EditableText"
  * an SMS number. Confirming kicks off the same subscribe → provision flow as a
  * direct switch.
  *
+ * While the account is still in its free trial (`isTrial`), the same plan is
+ * shown but framed as free until the trial ends: a callout reassures the user
+ * nothing is charged today and the price block leads with "$0 due today, then
+ * $50/month after {trialEndLabel}".
+ *
  * @param {boolean} open
+ * @param {boolean} [isTrial]        - account is in its free trial → texting is free until the trial ends
+ * @param {string}  [trialEndLabel]  - when the trial ends and billing begins (e.g. "June 24, 2026")
  * @param {() => void} onConfirm  - enable texting (subscribe + auto-provision)
  * @param {() => void} onClose    - dismiss without enabling
  */
-export default function EnableTextingModal({ open, onConfirm, onClose }) {
+export default function EnableTextingModal({
+  open,
+  isTrial = false,
+  trialEndLabel,
+  onConfirm,
+  onClose,
+}) {
   useEffect(() => {
     if (!open) return
     const onKey = (e) => e.key === "Escape" && onClose()
@@ -64,6 +81,34 @@ export default function EnableTextingModal({ open, onConfirm, onClose }) {
               Enable Website Texting
             </EditableText>
 
+            {/* Trial callout — texting is free until the trial converts to paid */}
+            {isTrial && (
+              <div className="flex items-start gap-2.5 rounded-t-[12px] -mb-10 pb-9 border border-black/10 bg-gradient-to-b from-white via-white to-amber-50 p-3.5">
+                <GiftIcon
+                  className="mt-px size-5 shrink-0 text-amber-500"
+                  strokeWidth={1.8}
+                />
+                <div className="min-w-0">
+                  <EditableText
+                    id="enableTexting.trialTitle"
+                    as="p"
+                    className="text-[14px] font-semibold leading-5 text-black"
+                  >
+                    Free for the rest of your trial
+                  </EditableText>
+                  <EditableText
+                    id="enableTexting.trialBody"
+                    as="p"
+                    multiline
+                    className="mt-0.5 text-[13px] leading-[1.4] text-gray-800"
+                  >
+                    Turn on Website Texting now at no charge. You won't be
+                    billed until your trial ends — cancel anytime before then.
+                  </EditableText>
+                </div>
+              </div>
+            )}
+
             {/* Plan card */}
             <div className="overflow-hidden rounded-[12px] border-2 border-purple-600 bg-white shadow-[0_4px_6px_-1px_rgba(130,42,198,0.09),0_2px_4px_-1px_rgba(130,42,198,0.06)]">
               <div className="flex flex-col gap-1 p-5">
@@ -85,18 +130,51 @@ export default function EnableTextingModal({ open, onConfirm, onClose }) {
                 </div>
 
                 <div className="flex flex-col gap-2.5">
-                  <div className="flex items-end gap-1">
-                    <span className="text-[26px] font-bold leading-8 tracking-[-0.52px] text-black">
-                      $50
-                    </span>
-                    <EditableText
-                      id="enableTexting.priceNote"
-                      as="span"
-                      className="pb-[3px] text-[12px] leading-4 text-gray-800"
-                    >
-                      per month
-                    </EditableText>
-                  </div>
+                  {isTrial ? (
+                    <div className="flex flex-col gap-0.5">
+                      <div className="flex items-end gap-1">
+                        <span className="text-[26px] font-bold leading-8 tracking-[-0.52px] text-black">
+                          $0
+                        </span>
+                        <EditableText
+                          id="enableTexting.trialPriceNote"
+                          as="span"
+                          className="pb-[3px] text-[12px] leading-4 text-gray-800"
+                        >
+                          due today
+                        </EditableText>
+                      </div>
+                      <p className="text-[12px] leading-4 text-gray-600">
+                        <EditableText
+                          id="enableTexting.trialPriceSub"
+                          as="span"
+                        >
+                          then $50/month after your trial ends
+                        </EditableText>
+                        {trialEndLabel ? (
+                          <>
+                            {" on "}
+                            <span className="font-medium text-gray-800">
+                              {trialEndLabel}
+                            </span>
+                          </>
+                        ) : null}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex items-end gap-1">
+                      <span className="text-[26px] font-bold leading-8 tracking-[-0.52px] text-black">
+                        $50
+                      </span>
+                      <EditableText
+                        id="enableTexting.priceNote"
+                        as="span"
+                        className="pb-[3px] text-[12px] leading-4 text-gray-800"
+                      >
+                        per month
+                      </EditableText>
+                    </div>
+                  )}
                   <div className="h-px w-full bg-gray-200" />
                 </div>
               </div>
@@ -142,10 +220,18 @@ export default function EnableTextingModal({ open, onConfirm, onClose }) {
               </button>
 
               <p className="text-center text-[12px] font-medium leading-[1.4] text-[#323232]">
-                <EditableText id="enableTexting.disclaimer" as="span">
-                  By enabling Website Texting, you agree to monthly charges and
-                  overages
-                </EditableText>{" "}
+                {isTrial ? (
+                  <EditableText id="enableTexting.trialDisclaimer" as="span">
+                    You won't be charged during your trial. Billing begins when
+                    your trial ends, and you agree to monthly charges and
+                    overages from then.
+                  </EditableText>
+                ) : (
+                  <EditableText id="enableTexting.disclaimer" as="span">
+                    By enabling Website Texting, you agree to monthly charges
+                    and overages
+                  </EditableText>
+                )}{" "}
                 <EditableText
                   id="enableTexting.terms"
                   as="span"
