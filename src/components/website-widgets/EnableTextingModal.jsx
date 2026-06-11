@@ -130,38 +130,10 @@ export default function EnableTextingModal({
                 </div>
 
                 <div className="flex flex-col gap-2.5">
-                  {isTrial ? (
-                    <div className="flex flex-col gap-0.5">
-                      <div className="flex items-end gap-1">
-                        <span className="text-[26px] font-bold leading-8 tracking-[-0.52px] text-black">
-                          $0
-                        </span>
-                        <EditableText
-                          id="enableTexting.trialPriceNote"
-                          as="span"
-                          className="pb-[3px] text-[12px] leading-4 text-gray-800"
-                        >
-                          due today
-                        </EditableText>
-                      </div>
-                      <p className="text-[12px] leading-4 text-gray-600">
-                        <EditableText
-                          id="enableTexting.trialPriceSub"
-                          as="span"
-                        >
-                          then $50/month after your trial ends
-                        </EditableText>
-                        {trialEndLabel ? (
-                          <>
-                            {" on "}
-                            <span className="font-medium text-gray-800">
-                              {trialEndLabel}
-                            </span>
-                          </>
-                        ) : null}
-                      </p>
-                    </div>
-                  ) : (
+                  {/* Headline price stays $50/month in every state so it's never
+                      misread as free — the trial sub-line carries the "free now"
+                      nuance and the date billing begins. */}
+                  <div className="flex flex-col gap-0.5">
                     <div className="flex items-end gap-1">
                       <span className="text-[26px] font-bold leading-8 tracking-[-0.52px] text-black">
                         $50
@@ -174,7 +146,25 @@ export default function EnableTextingModal({
                         per month
                       </EditableText>
                     </div>
-                  )}
+                    {isTrial && (
+                      <p className="text-[12px] font-medium leading-4 text-amber-700">
+                        <EditableText
+                          id="enableTexting.trialPriceSub"
+                          as="span"
+                        >
+                          Free during your trial — billing starts
+                        </EditableText>
+                        {trialEndLabel ? (
+                          <>
+                            {" "}
+                            <span className="font-semibold">
+                              {trialEndLabel}
+                            </span>
+                          </>
+                        ) : null}
+                      </p>
+                    )}
+                  </div>
                   <div className="h-px w-full bg-gray-200" />
                 </div>
               </div>
