@@ -3,6 +3,7 @@ import {
   WindowIcon,
   ChatBubbleOvalLeftEllipsisIcon,
   CalendarDaysIcon,
+  GiftIcon,
 } from "@heroicons/react/24/outline"
 import SectionCard from "./SectionCard"
 import InfoBanner from "./InfoBanner"
@@ -49,6 +50,7 @@ function WidgetCard({
   subtitle,
   price,
   priceNote,
+  priceBadge,
   features,
   featuresIntro,
   featuresIdPrefix,
@@ -84,7 +86,10 @@ function WidgetCard({
       <div
         className={`flex flex-col gap-1 p-4 rounded-lg mt-4 ${active ? "bg-purple-100/70" : "bg-gray-50"}`}
       >
-        <p className={`text-lg font-semibold text-black`}>{price}</p>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-lg font-semibold text-black">{price}</p>
+          {priceBadge}
+        </div>
         <p className={`text-sm ${active ? "text-black/50" : "text-gray-600"}`}>
           {priceNote}
         </p>
@@ -118,6 +123,7 @@ function WidgetCard({
  * @param {"chat"|"texting"} liveWidget
  * @param {string} periodEndLabel
  * @param {boolean} chatSwitchNotice
+ * @param {boolean} isTrial                     - account in trial → texting is free during it
  * @param {() => void} onChangeToTexting        - subscribe (auto-provisions)
  * @param {() => void} onChangeToChat           - open the billing switch-back modal
  * @param {() => void} onKeepTexting            - cancel a scheduled switch
@@ -128,6 +134,7 @@ export default function WidgetCompareInline({
   liveWidget,
   periodEndLabel,
   chatSwitchNotice,
+  isTrial = false,
   onChangeToTexting,
   onChangeToChat,
   onKeepTexting,
@@ -249,6 +256,19 @@ export default function WidgetCompareInline({
               <EditableText id="compare.texting.priceNote" as="span">
                 25 conversations included per month · $1 per additional
               </EditableText>
+            }
+            priceBadge={
+              isTrial ? (
+                <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold leading-none text-amber-700">
+                  <GiftIcon
+                    className="size-3.5 shrink-0 text-amber-500"
+                    strokeWidth={1.8}
+                  />
+                  <EditableText id="compare.texting.trialBanner" as="span">
+                    Free during trial
+                  </EditableText>
+                </span>
+              ) : null
             }
             features={TEXTING_FEATURES}
             featuresIntro={
