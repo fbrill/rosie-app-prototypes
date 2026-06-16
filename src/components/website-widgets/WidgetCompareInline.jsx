@@ -34,10 +34,12 @@ const TEXTING_FEATURES = [
   "Call them back anytime",
 ]
 
+// The switch CTA is a quiet, secondary action — emphasis on the page should come
+// from the active tile's border + pill, not from the button that takes you away.
 const changeBtn =
-  "flex items-center justify-center gap-1.5 rounded-full bg-black py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-black/90 w-full px-10 cursor-pointer"
+  "flex items-center justify-center gap-1.5 rounded-full border border-gray-300 bg-white py-2.5 text-center text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 w-full px-10 cursor-pointer"
 const activeBtn =
-  "cursor-default rounded-full bg-black/10 py-3 text-center text-sm font-semibold text-black/60 w-full px-10"
+  "cursor-default rounded-full border border-transparent bg-black/10 py-2.5 text-center text-sm font-semibold text-black/60 w-full px-10"
 
 /**
  * One option card: icon + title + subtitle, neutral price, a vertical checkmark
@@ -59,8 +61,10 @@ function WidgetCard({
 }) {
   return (
     <div
-      className={`flex flex-col rounded-[12px] border p-6 transition-colors ${
-        active ? "border-purple-300 bg-purple-25" : "border-gray-200 bg-white"
+      className={`flex flex-col rounded-[12px] border-2 p-6 transition-colors ${
+        active
+          ? "border-purple-400 bg-purple-25 shadow-sm shadow-purple-100"
+          : "border-gray-200 bg-white"
       }`}
     >
       <div className="flex items-start justify-between gap-3">

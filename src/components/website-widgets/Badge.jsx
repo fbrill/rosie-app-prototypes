@@ -39,10 +39,10 @@ export function ActiveBadge() {
  */
 export function LiveBadge({ label = "Live on your site" }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full bg-purple-100 py-[5px] pl-2.5 pr-3 text-xs font-medium text-purple-700">
+    <span className="inline-flex items-center gap-2 rounded-full bg-purple-600 py-[5px] pl-2.5 pr-3 text-xs font-semibold text-white shadow-sm">
       <span className="relative flex size-2">
-        <span className="absolute inline-flex size-full animate-ping rounded-full bg-purple-500 opacity-60" />
-        <span className="relative inline-flex size-2 rounded-full bg-purple-500" />
+        <span className="absolute inline-flex size-full animate-ping rounded-full bg-white opacity-75" />
+        <span className="relative inline-flex size-2 rounded-full bg-white" />
       </span>
       {label}
     </span>
