@@ -4,11 +4,12 @@ import {
   ChatBubbleOvalLeftEllipsisIcon,
   CalendarDaysIcon,
   GiftIcon,
+  CheckIcon,
+  ArrowRightIcon,
 } from "@heroicons/react/24/outline"
 import SectionCard from "./SectionCard"
 import InfoBanner from "./InfoBanner"
 import SmsIcon from "./SmsIcon"
-import { LiveBadge } from "./Badge"
 import { FeatureList } from "./widgetCompareData"
 import EditableText from "../edit-mode/EditableText"
 import {
@@ -37,14 +38,14 @@ const TEXTING_FEATURES = [
 // The switch CTA is a quiet, secondary action — emphasis on the page should come
 // from the active tile's border + pill, not from the button that takes you away.
 const changeBtn =
-  "flex items-center justify-center gap-1.5 rounded-full border border-gray-300 bg-white py-2.5 text-center text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 w-full px-10 cursor-pointer"
+  "flex items-center justify-center gap-1.5 rounded-full border border-gray-300 bg-white py-2.5 text-center text-sm font-semibold text-gray-700 transition-colors hover:bg-purple-200 hover:text-purple-700 hover:border-purple-200 w-full px-10 cursor-pointer"
 const activeBtn =
-  "cursor-default rounded-full border border-transparent bg-black/10 py-2.5 text-center text-sm font-semibold text-black/60 w-full px-10"
+  "flex items-center justify-center gap-1.5 cursor-default rounded-full border border-transparent bg-purple-100/70 py-2.5 text-center text-sm font-semibold text-purple-700 w-full px-10 [&>span]:text-purple-900"
 
 /**
  * One option card: icon + title + subtitle, neutral price, a vertical checkmark
  * feature list (with an optional intro line), and a footer slot. The active
- * widget gets a purple selected treatment and an "Active" badge.
+ * widget gets a purple selected treatment.
  */
 function WidgetCard({
   icon: Icon,
@@ -84,7 +85,6 @@ function WidgetCard({
             <p className="text-sm text-gray-600">{subtitle}</p>
           </div>
         </div>
-        {active && <LiveBadge label="Active" />}
       </div>
 
       <div
@@ -155,7 +155,8 @@ export default function WidgetCompareInline({
 
   const chatFooter = chatActive ? (
     <button type="button" disabled className={activeBtn}>
-      <EditableText id="compare.chat.activeBtn">Active widget</EditableText>
+      <CheckIcon className="size-4 shrink-0" strokeWidth={2} />
+      <EditableText id="compare.chat.activeBtn">Selected Widget</EditableText>
     </button>
   ) : isScheduled ? (
     <div className="flex w-full items-center justify-center gap-1.5 rounded-full bg-gray-100 px-10 py-3 text-center text-sm font-medium text-gray-500">
@@ -167,12 +168,14 @@ export default function WidgetCompareInline({
       <EditableText id="compare.chat.changeBtn">
         Switch to Website Texting
       </EditableText>
+      <ArrowRightIcon className="size-4 shrink-0" strokeWidth={2} />
     </button>
   )
 
   const textingFooter = textingActive ? (
     <button type="button" disabled className={activeBtn}>
-      <EditableText id="compare.texting.activeBtn">Active widget</EditableText>
+      <CheckIcon className="size-4 shrink-0" strokeWidth={2} />
+      <EditableText id="compare.texting.activeBtn">Selected Widget</EditableText>
     </button>
   ) : isProvisioning ? (
     <div
@@ -189,6 +192,7 @@ export default function WidgetCompareInline({
       <EditableText id="compare.texting.changeBtn">
         Switch to Website Chat
       </EditableText>
+      <ArrowRightIcon className="size-4 shrink-0" strokeWidth={2} />
     </button>
   )
 
