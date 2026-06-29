@@ -1,10 +1,31 @@
 import {
+  ArrowDownCircleIcon,
   CalendarDaysIcon,
   CheckCircleIcon,
   InformationCircleIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline"
 import EditableText from "../edit-mode/EditableText"
+
+/**
+ * Shared "next step" link inside the success banners — scrolls the page down to
+ * the Installation section so the user can copy their embed snippet. Needs a
+ * distinct EditableText id per banner (ids must be unique across the page).
+ */
+function InstallStepLink({ id, onGoToInstall }) {
+  return (
+    <button
+      type="button"
+      onClick={onGoToInstall}
+      className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3.5 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700"
+    >
+      <ArrowDownCircleIcon className="size-4 shrink-0" strokeWidth={2} />
+      <EditableText id={id} as="span">
+        Copy your installation code
+      </EditableText>
+    </button>
+  )
+}
 
 /**
  * Interim-state notices for the widget journey, rendered by the inline widget
@@ -48,8 +69,45 @@ export function ChatSwitchNotice({ periodEndLabel, onDismiss }) {
   )
 }
 
+/** Emerald success banner when Website Chat is selected and goes live. */
+export function ChatLiveNotice({ onDismiss, onGoToInstall }) {
+  return (
+    <div className="flex items-start gap-3 rounded-[10px] border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+      <CheckCircleIcon
+        className="mt-0.5 size-5 shrink-0 text-emerald-600"
+        strokeWidth={1.5}
+      />
+      <div className="flex-1 leading-snug">
+        <p className="font-semibold">
+          <EditableText id="notice.chatLive.title" as="span">
+            Website Chat is your selected widget
+          </EditableText>
+        </p>
+        <p className="mt-1 text-emerald-800">
+          <EditableText id="notice.chatLive.body" as="span" multiline>
+            Last step: add Rosie to your site. Copy the installation code below
+            and paste it into your website — then Website Chat goes live.
+          </EditableText>
+        </p>
+        <InstallStepLink
+          id="notice.chatLive.installLink"
+          onGoToInstall={onGoToInstall}
+        />
+      </div>
+      <button
+        type="button"
+        onClick={onDismiss}
+        className="-m-1 shrink-0 rounded-full p-1 text-emerald-700 opacity-70 transition-opacity hover:opacity-100"
+        aria-label="Dismiss"
+      >
+        <XMarkIcon className="size-4" strokeWidth={2} />
+      </button>
+    </div>
+  )
+}
+
 /** Emerald success banner when Website Texting goes live. */
-export function TextingLiveNotice({ onDismiss }) {
+export function TextingLiveNotice({ onDismiss, onGoToInstall }) {
   return (
     <div className="flex items-start gap-3 rounded-[10px] border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
       <CheckCircleIcon
@@ -59,16 +117,20 @@ export function TextingLiveNotice({ onDismiss }) {
       <div className="flex-1 leading-snug">
         <p className="font-semibold">
           <EditableText id="notice.textingLive.title" as="span">
-            You&apos;ve switched to Website Texting
+            Website Texting is your selected widget
           </EditableText>
         </p>
         <p className="mt-1 text-emerald-800">
           <EditableText id="notice.textingLive.body" as="span" multiline>
-            Nothing else to do — your existing embed code keeps working.
-            You&apos;ll start seeing more leads show up in your Conversations
-            inbox.
+            Last step: add Rosie to your site. Copy the installation code below
+            and paste it into your website — then you&apos;ll start seeing leads
+            in your Conversations inbox.
           </EditableText>
         </p>
+        <InstallStepLink
+          id="notice.textingLive.installLink"
+          onGoToInstall={onGoToInstall}
+        />
       </div>
       <button
         type="button"

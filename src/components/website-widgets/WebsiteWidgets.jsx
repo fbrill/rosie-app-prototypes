@@ -76,11 +76,14 @@ export default function WebsiteWidgets() {
               stage={stage}
               liveWidget={journey.liveWidget}
               periodEndLabel={BILLING_PERIOD_END}
+              chatSelectedNotice={journey.chatSelectedNotice}
               chatSwitchNotice={journey.chatSwitchNotice}
               isTrial={journey.inTrial}
+              onSelectChat={journey.selectChat}
               onChangeToTexting={() => setEnableTextingOpen(true)}
               onChangeToChat={() => setBillingOpen(true)}
               onKeepTexting={journey.keepTexting}
+              onDismissChatSelectedNotice={journey.dismissChatSelectedNotice}
               onDismissChatSwitchNotice={journey.dismissChatSwitchNotice}
             />
 

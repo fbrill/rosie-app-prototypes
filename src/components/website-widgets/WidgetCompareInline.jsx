@@ -14,6 +14,7 @@ import { FeatureList } from "./widgetCompareData"
 import EditableText from "../edit-mode/EditableText"
 import {
   ChatSwitchNotice,
+  ChatLiveNotice,
   TextingLiveNotice,
   ProvisioningNotice,
   ScheduledSwitchNotice,
@@ -41,6 +42,10 @@ const changeBtn =
   "flex items-center justify-center gap-1.5 rounded-full border border-gray-300 bg-white py-2.5 text-center text-sm font-semibold text-gray-700 transition-colors hover:bg-purple-200 hover:text-purple-700 hover:border-purple-200 w-full px-10 cursor-pointer"
 const activeBtn =
   "flex items-center justify-center gap-1.5 cursor-default rounded-full border border-transparent bg-purple-100/70 py-2.5 text-center text-sm font-semibold text-purple-700 w-full px-10 [&>span]:text-purple-900"
+// In the entry state the user MUST choose, so the select CTAs are prominent
+// (filled purple) rather than the quiet outline "switch" treatment.
+const selectBtn =
+  "flex items-center justify-center gap-1.5 rounded-full bg-purple-600 py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-purple-800 w-full px-10 cursor-pointer"
 
 /**
  * One option card: icon + title + subtitle, neutral price, a vertical checkmark
@@ -124,26 +129,33 @@ function WidgetCard({
  * option to switch. Reuses the shared journey notices for the interim states.
  *
  * @param {string} stage
- * @param {"chat"|"texting"} liveWidget
+ * @param {"none"|"chat"|"texting"} liveWidget
  * @param {string} periodEndLabel
+ * @param {boolean} chatSelectedNotice
  * @param {boolean} chatSwitchNotice
  * @param {boolean} isTrial                     - account in trial → texting is free during it
+ * @param {() => void} onSelectChat             - pick Chat from the entry state
  * @param {() => void} onChangeToTexting        - subscribe (auto-provisions)
  * @param {() => void} onChangeToChat           - open the billing switch-back modal
  * @param {() => void} onKeepTexting            - cancel a scheduled switch
+ * @param {() => void} onDismissChatSelectedNotice
  * @param {() => void} onDismissChatSwitchNotice
  */
 export default function WidgetCompareInline({
   stage,
   liveWidget,
   periodEndLabel,
+  chatSelectedNotice,
   chatSwitchNotice,
   isTrial = false,
+  onSelectChat,
   onChangeToTexting,
   onChangeToChat,
   onKeepTexting,
+  onDismissChatSelectedNotice,
   onDismissChatSwitchNotice,
 }) {
+  const noneSelected = liveWidget === "none"
   const chatActive = liveWidget === "chat"
   const textingActive = liveWidget === "texting"
   const isProvisioning = stage === "provisioning"
@@ -153,10 +165,22 @@ export default function WidgetCompareInline({
   const [successDismissed, setSuccessDismissed] = useState(false)
   useEffect(() => setSuccessDismissed(false), [stage])
 
+  // Scroll down to the Installation section (the next step after selecting).
+  const scrollToInstall = () =>
+    document
+      .getElementById("installation")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" })
+
   const chatFooter = chatActive ? (
     <button type="button" disabled className={activeBtn}>
       <CheckIcon className="size-4 shrink-0" strokeWidth={2} />
       <EditableText id="compare.chat.activeBtn">Selected Widget</EditableText>
+    </button>
+  ) : noneSelected ? (
+    <button type="button" onClick={onSelectChat} className={selectBtn}>
+      <EditableText id="compare.chat.selectBtn">
+        Select Website Chat
+      </EditableText>
     </button>
   ) : isScheduled ? (
     <div className="flex w-full items-center justify-center gap-1.5 rounded-full bg-gray-100 px-10 py-3 text-center text-sm font-medium text-gray-500">
@@ -166,7 +190,7 @@ export default function WidgetCompareInline({
   ) : (
     <button type="button" onClick={onChangeToChat} className={changeBtn}>
       <EditableText id="compare.chat.changeBtn">
-        Switch to Website Texting
+        Switch to Website Chat
       </EditableText>
       <ArrowRightIcon className="size-4 shrink-0" strokeWidth={2} />
     </button>
@@ -187,10 +211,16 @@ export default function WidgetCompareInline({
         Switching over...
       </EditableText>
     </div>
+  ) : noneSelected ? (
+    <button type="button" onClick={onChangeToTexting} className={selectBtn}>
+      <EditableText id="compare.texting.selectBtn">
+        Select Website Texting
+      </EditableText>
+    </button>
   ) : (
     <button type="button" onClick={onChangeToTexting} className={changeBtn}>
       <EditableText id="compare.texting.changeBtn">
-        Switch to Website Chat
+        Switch to Website Texting
       </EditableText>
       <ArrowRightIcon className="size-4 shrink-0" strokeWidth={2} />
     </button>
@@ -206,10 +236,17 @@ export default function WidgetCompareInline({
       }
     >
       <InfoBanner>
-        <EditableText id="compare.info" multiline>
-          You can run one widget at a time. Switching is instant and keeps your
-          existing install snippet — only the live experience changes.
-        </EditableText>
+        {noneSelected ? (
+          <EditableText id="compare.infoNone" multiline>
+            Choose the widget you want on your site to get started. Neither is
+            live yet — nothing runs on your site until you pick one.
+          </EditableText>
+        ) : (
+          <EditableText id="compare.info" multiline>
+            You can run one widget at a time. Switching is instant and keeps your
+            existing install snippet — only the live experience changes.
+          </EditableText>
+        )}
       </InfoBanner>
 
       <div className="flex flex-col gap-5 p-6">
@@ -290,6 +327,13 @@ export default function WidgetCompareInline({
           />
         </div>
 
+        {stage === "chat" && chatSelectedNotice && (
+          <ChatLiveNotice
+            onDismiss={onDismissChatSelectedNotice}
+            onGoToInstall={scrollToInstall}
+          />
+        )}
+
         {stage === "chat" && chatSwitchNotice && (
           <ChatSwitchNotice
             periodEndLabel={periodEndLabel}
@@ -298,7 +342,10 @@ export default function WidgetCompareInline({
         )}
 
         {stage === "texting" && !successDismissed && (
-          <TextingLiveNotice onDismiss={() => setSuccessDismissed(true)} />
+          <TextingLiveNotice
+            onDismiss={() => setSuccessDismissed(true)}
+            onGoToInstall={scrollToInstall}
+          />
         )}
 
         {isProvisioning && <ProvisioningNotice />}

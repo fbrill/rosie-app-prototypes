@@ -6,6 +6,7 @@
  * @param {string} title              - header title
  * @param {React.ReactNode} headerRight - optional content on the header's right
  * @param {React.ReactNode} children  - card body
+ * @param {string} id                 - optional DOM id (used as a scroll anchor)
  */
 export default function SectionCard({
   icon: Icon,
@@ -13,9 +14,11 @@ export default function SectionCard({
   headerRight,
   children,
   className = "",
+  id,
 }) {
   return (
     <section
+      id={id}
       className={`overflow-hidden rounded-[12px] border border-gray-200 bg-white ${className}`}
     >
       <div className="flex items-center justify-between border-b border-gray-200 bg-gradient-to-t from-gray-25 to-white px-6 py-5">

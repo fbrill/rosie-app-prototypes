@@ -5,24 +5,34 @@ import { useDialKit } from "dialkit"
 const PROVISIONING_DELAY_MS = 2500
 
 /**
- * State machine for the Website Widgets top section. Website Chat is the free,
- * always-available default; Website Texting is a $50/mo add-on. One widget is
- * live on the site at a time, surfaced as two stacked containers.
+ * State machine for the Website Widgets top section. A fresh account starts in
+ * the "none" entry state — neither widget is live yet, so the user must pick one
+ * to proceed (this makes it clear Website Chat is NOT already running on their
+ * site). Website Chat is free; Website Texting is a $50/mo add-on. One widget is
+ * live on the site at a time, surfaced as two side-by-side containers.
  *
+ *   none ──(select chat)──▶ chat
+ *   none ──(select texting / subscribe)──▶ provisioning ──(auto, ~2.5s)──▶ texting
  *   chat ──(subscribe)──▶ provisioning ──(auto, ~2.5s)──▶ texting
  *   texting ──(switch back)──▶ chat (now)  |  texting-scheduled (end of period)
  *
- * Subscribing auto-provisions the number — no extra click. While provisioning,
- * Chat stays live. Switching texting → chat is billing-aware (now vs scheduled).
- * Switching widgets takes effect immediately, so it does NOT arm Publish — only
- * appearance/customization edits do (via markPending). DialKit jumps statically
- * to any state for review and carries an "Account in trial" toggle (`inTrial`)
- * that flips the enable-texting flow between its free-trial and paid framing.
+ * Selecting Chat for the first time surfaces a dismissible success banner;
+ * selecting Texting opens the subscribe modal, which auto-provisions the number
+ * (no extra click). While provisioning, the site shows nothing new yet. Switching
+ * texting → chat is billing-aware (now vs scheduled). Switching widgets takes
+ * effect immediately, so it does NOT arm Publish — only appearance/customization
+ * edits do (via markPending). DialKit jumps statically to any state for review
+ * and carries an "Account in trial" toggle (`inTrial`) that flips the
+ * enable-texting flow between its free-trial and paid framing.
  */
 export function useWidgetJourney() {
-  const [stage, setStage] = useState("chat")
+  // "none" = nothing selected yet (new-account entry state).
+  const [stage, setStage] = useState("none")
   // Once texting has been subscribed + provisioned, re-enabling is instant.
   const [addonProvisioned, setAddonProvisioned] = useState(false)
+  // True right after Website Chat is selected from the entry state — drives the
+  // green "Chat is live, now install it" success banner.
+  const [chatSelectedNotice, setChatSelectedNotice] = useState(false)
   // True after a billing-aware "Switch now" back to Chat — drives the info
   // banner that tells the user their Texting add-on will expire at period end.
   const [chatSwitchNotice, setChatSwitchNotice] = useState(false)
@@ -57,11 +67,21 @@ export function useWidgetJourney() {
   }
 
   // --- Click-path transitions -------------------------------------------------
+  // Select Website Chat from the entry state (or re-pick it). Free + instant,
+  // so it goes live right away and surfaces a one-time "now install it" banner.
+  const selectChat = () => {
+    clearTimers()
+    setChatSwitchNotice(false)
+    setStage("chat")
+    setChatSelectedNotice(true)
+  }
+
   // Subscribing auto-provisions the number — no activate click. If already
   // provisioned once, go live instantly.
   const subscribeTexting = () => {
     clearTimers()
     setChatSwitchNotice(false)
+    setChatSelectedNotice(false)
     if (addonProvisioned) {
       setStage("texting")
     } else {
@@ -74,10 +94,12 @@ export function useWidgetJourney() {
   const switchToChatNow = () => {
     clearTimers()
     setStage("chat")
+    setChatSelectedNotice(false)
     setChatSwitchNotice(true)
   }
 
   const dismissChatSwitchNotice = () => setChatSwitchNotice(false)
+  const dismissChatSelectedNotice = () => setChatSelectedNotice(false)
 
   // Keep texting live but schedule the switch to Chat for the period end.
   const scheduleSwitchToChat = () => {
@@ -98,7 +120,8 @@ export function useWidgetJourney() {
       // Account billing context. In trial, the Website Texting add-on is free
       // until the trial ends; toggle off to preview the standard paid flow.
       accountInTrial: true,
-      goChat: { type: "action", label: "↦ Chat live (default)" },
+      goNone: { type: "action", label: "↦ New (nothing selected)" },
+      goChat: { type: "action", label: "↦ Chat live" },
       goProvisioning: { type: "action", label: "↦ Texting: provisioning" },
       goTextingLive: { type: "action", label: "↦ Texting: live" },
       goScheduledSwitch: { type: "action", label: "↦ Texting: ending (scheduled)" },
@@ -108,7 +131,13 @@ export function useWidgetJourney() {
       onAction: (action) => {
         clearTimers()
         setChatSwitchNotice(false)
+        setChatSelectedNotice(false)
         switch (action) {
+          case "goNone":
+            setStage("none")
+            setAddonProvisioned(false)
+            setPendingPublish(false)
+            break
           case "goChat":
             setStage("chat")
             setPendingPublish(false)
@@ -130,7 +159,7 @@ export function useWidgetJourney() {
             break
           case "reset":
             setAddonProvisioned(false)
-            setStage("chat")
+            setStage("none")
             setPendingPublish(false)
             break
           default:
@@ -142,10 +171,15 @@ export function useWidgetJourney() {
 
   useEffect(() => () => clearTimers(), [])
 
-  // Which widget is actually live on the site right now. Texting only goes live
-  // once provisioning completes, so the site stays on Chat until then.
+  // Which widget is actually live on the site right now. "none" until the user
+  // picks one. Texting only goes live once provisioning completes, so the site
+  // stays on Chat (or nothing) until then.
   const liveWidget =
-    stage === "texting" || stage === "texting-scheduled" ? "texting" : "chat"
+    stage === "none"
+      ? "none"
+      : stage === "texting" || stage === "texting-scheduled"
+        ? "texting"
+        : "chat"
 
   const numberStatus =
     stage === "texting" || stage === "texting-scheduled"
@@ -154,8 +188,9 @@ export function useWidgetJourney() {
         ? "inProgress"
         : "inactive"
 
-  // The customization preview mirrors the live widget.
-  const previewType = liveWidget
+  // The customization preview mirrors the live widget, falling back to Chat in
+  // the entry state so there's always something sensible to preview.
+  const previewType = liveWidget === "none" ? "chat" : liveWidget
 
   return {
     stage,
@@ -164,14 +199,17 @@ export function useWidgetJourney() {
     previewType,
     addonProvisioned,
     inTrial: dials.accountInTrial,
+    chatSelectedNotice,
     chatSwitchNotice,
     pendingPublish,
     publishNonce,
     // transitions
+    selectChat,
     subscribeTexting,
     switchToChatNow,
     scheduleSwitchToChat,
     keepTexting,
+    dismissChatSelectedNotice,
     dismissChatSwitchNotice,
     markPending,
   }
