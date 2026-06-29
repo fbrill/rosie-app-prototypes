@@ -50,7 +50,9 @@ const selectBtn =
 /**
  * One option card: icon + title + subtitle, neutral price, a vertical checkmark
  * feature list (with an optional intro line), and a footer slot. The active
- * widget gets a purple selected treatment.
+ * widget gets a purple selected treatment. In the empty entry state, both cards
+ * get a softer purple outline + purple icon (no fill) to read as "pick one"
+ * without either looking already selected.
  */
 function WidgetCard({
   icon: Icon,
@@ -63,25 +65,29 @@ function WidgetCard({
   featuresIntro,
   featuresIdPrefix,
   active,
+  outlined,
   footer,
 }) {
+  const purpleAccent = active || outlined
   return (
     <div
       className={`flex flex-col rounded-[12px] border-2 p-6 transition-colors ${
         active
           ? "border-purple-400 bg-purple-25 shadow-sm shadow-purple-100"
-          : "border-gray-200 bg-white"
+          : outlined
+            ? "border-purple-300 bg-white"
+            : "border-gray-200 bg-white"
       }`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <span
             className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${
-              active ? "bg-purple-200" : "bg-gray-100"
+              purpleAccent ? "bg-purple-200" : "bg-gray-100"
             }`}
           >
             <Icon
-              className={`size-6 ${active ? "text-purple-700" : "text-gray-700"}`}
+              className={`size-6 ${purpleAccent ? "text-purple-700" : "text-gray-700"}`}
               strokeWidth={1.5}
             />
           </span>
@@ -179,7 +185,7 @@ export default function WidgetCompareInline({
   ) : noneSelected ? (
     <button type="button" onClick={onSelectChat} className={selectBtn}>
       <EditableText id="compare.chat.selectBtn">
-        Select Website Chat
+        Get started with Website Chat
       </EditableText>
     </button>
   ) : isScheduled ? (
@@ -214,7 +220,7 @@ export default function WidgetCompareInline({
   ) : noneSelected ? (
     <button type="button" onClick={onChangeToTexting} className={selectBtn}>
       <EditableText id="compare.texting.selectBtn">
-        Select Website Texting
+        Get started with Website Texting
       </EditableText>
     </button>
   ) : (
@@ -276,6 +282,7 @@ export default function WidgetCompareInline({
             features={CHAT_FEATURES}
             featuresIdPrefix="compare.chatFeatures"
             active={chatActive}
+            outlined={noneSelected}
             footer={chatFooter}
           />
 
@@ -323,6 +330,7 @@ export default function WidgetCompareInline({
             }
             featuresIdPrefix="compare.textingFeatures"
             active={textingActive}
+            outlined={noneSelected}
             footer={textingFooter}
           />
         </div>
