@@ -120,6 +120,8 @@ export default function InstallationCard() {
 
   return (
     <SectionCard
+      id="installation"
+      className="scroll-mt-4"
       icon={CodeBracketSquareIcon}
       title={
         <EditableText id="install.sectionTitle" as="span">
